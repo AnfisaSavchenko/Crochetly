@@ -10,7 +10,13 @@ import {
   AIGenerationResult,
   ProcessingStage,
 } from '@/types/ai';
-import { DifficultyLevel, YarnWeight } from '@/types/project';
+import {
+  DifficultyLevel,
+  YarnWeight,
+  StructuredPattern,
+  InteractivePatternSection,
+  PatternRow,
+} from '@/types/project';
 
 /**
  * Callbacks for tracking progress during generation
@@ -311,13 +317,55 @@ export async function generateProjectFromImage(
 }
 
 /**
+ * Generate a unique ID for pattern elements
+ */
+const generateId = (prefix: string, index: number): string => {
+  return `${prefix}_${Date.now()}_${index}`;
+};
+
+/**
+ * Convert AI pattern sections to interactive structured format
+ */
+function convertToStructuredPattern(pattern: GeneratedPattern): StructuredPattern {
+  const sections: InteractivePatternSection[] = pattern.sections.map((section, sectionIndex) => {
+    const rows: PatternRow[] = section.instructions.map((instruction, rowIndex) => ({
+      id: generateId(`row_${sectionIndex}`, rowIndex),
+      instruction,
+      isCompleted: false,
+    }));
+
+    return {
+      id: generateId('section', sectionIndex),
+      name: section.name,
+      rows,
+    };
+  });
+
+  return {
+    sections,
+    abbreviations: pattern.abbreviations,
+    otherSupplies: pattern.materials.otherSupplies,
+    estimatedTime: pattern.estimatedTime,
+  };
+}
+
+/**
  * Convert AI generation result to project data format
  */
 export function convertToProjectData(result: AIGenerationResult) {
   const { pattern, generatedImageUrl, originalImageUri } = result;
 
-  // Convert pattern sections to a formatted string
+  // Convert pattern sections to a formatted string (legacy)
   const patternText = formatPatternAsText(pattern);
+
+  // Convert to structured pattern for interactive mode
+  const structuredPattern = convertToStructuredPattern(pattern);
+
+  // Calculate total rows for progress tracking
+  const totalRows = structuredPattern.sections.reduce(
+    (total, section) => total + section.rows.length,
+    0
+  );
 
   return {
     name: pattern.projectName,
@@ -338,8 +386,13 @@ export function convertToProjectData(result: AIGenerationResult) {
     })),
     thumbnailUri: generatedImageUrl,
     imageUris: [originalImageUri, generatedImageUrl],
+    originalImageUri,
+    generatedImageUri: generatedImageUrl,
     aiGeneratedPattern: patternText,
     aiSuggestions: pattern.notes,
+    structuredPattern,
+    totalRows,
+    progressPercentage: 0,
   };
 }
 

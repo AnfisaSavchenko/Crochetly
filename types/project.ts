@@ -3,6 +3,8 @@
  * Types for crochet projects and related data
  */
 
+import type { PatternAbbreviation } from './ai';
+
 export type ProjectStatus = 'draft' | 'in_progress' | 'completed' | 'archived';
 export type DifficultyLevel = 'beginner' | 'easy' | 'intermediate' | 'advanced' | 'expert';
 export type YarnWeight = 'lace' | 'fingering' | 'sport' | 'dk' | 'worsted' | 'aran' | 'bulky' | 'super_bulky';
@@ -31,6 +33,39 @@ export interface PatternNote {
   updatedAt: string;
 }
 
+/**
+ * Interactive Pattern Row - a single instruction step with completion tracking
+ */
+export interface PatternRow {
+  id: string;
+  instruction: string;
+  isCompleted: boolean;
+  completedAt?: string;
+}
+
+/**
+ * Interactive Pattern Section - a group of rows for a specific part (e.g., Head, Body)
+ * Named differently from ai.ts PatternSection to avoid conflict
+ */
+export interface InteractivePatternSection {
+  id: string;
+  name: string;
+  rows: PatternRow[];
+}
+
+// Re-export alias for backwards compatibility
+export type PatternSection = InteractivePatternSection;
+
+/**
+ * Structured Pattern Data - full interactive pattern structure
+ */
+export interface StructuredPattern {
+  sections: InteractivePatternSection[];
+  abbreviations: PatternAbbreviation[];
+  otherSupplies: string[];
+  estimatedTime: string;
+}
+
 export interface Project {
   id: string;
   name: string;
@@ -54,10 +89,13 @@ export interface Project {
   // Media
   thumbnailUri?: string;
   imageUris?: string[];
+  originalImageUri?: string; // User's uploaded photo
+  generatedImageUri?: string; // AI-generated plushie visualization
 
   // AI Generated Content
-  aiGeneratedPattern?: string;
+  aiGeneratedPattern?: string; // Legacy: formatted text pattern
   aiSuggestions?: string[];
+  structuredPattern?: StructuredPattern; // New: interactive pattern data
 
   // Timestamps
   createdAt: string;
