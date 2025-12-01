@@ -54,6 +54,17 @@ const DIFFICULTY_COLORS: Record<DifficultyLevel, string> = {
   expert: '#E57373',
 };
 
+// Standard crochet abbreviations reference guide
+const STITCH_GUIDE = [
+  { abbr: 'sc', meaning: 'single crochet' },
+  { abbr: 'inc', meaning: 'increase (2 sc in same stitch)' },
+  { abbr: 'dec', meaning: 'invisible decrease' },
+  { abbr: 'ch', meaning: 'chain' },
+  { abbr: 'sl st', meaning: 'slip stitch' },
+  { abbr: 'MR', meaning: 'magic ring' },
+  { abbr: 'FO', meaning: 'fasten off' },
+] as const;
+
 // Toast notification component
 interface ToastProps {
   visible: boolean;
@@ -810,6 +821,23 @@ export default function PatternStudioScreen() {
             </View>
           </View>
         )}
+
+      {/* Stitch Guide - Static Reference */}
+      <View style={styles.stitchGuideCard}>
+        <View style={styles.stitchGuideHeader}>
+          <Ionicons name="book-outline" size={20} color={Colors.primary} />
+          <Text style={styles.cardTitle}>Stitch Guide</Text>
+        </View>
+        <Text style={styles.stitchGuideSubtitle}>Common crochet abbreviations</Text>
+        <View style={styles.stitchGuideList}>
+          {STITCH_GUIDE.map((stitch, index) => (
+            <View key={index} style={styles.stitchGuideRow}>
+              <Text style={styles.stitchGuideAbbr}>{stitch.abbr}</Text>
+              <Text style={styles.stitchGuideMeaning}>{stitch.meaning}</Text>
+            </View>
+          ))}
+        </View>
+      </View>
     </ScrollView>
   );
 
@@ -1306,6 +1334,50 @@ const styles = StyleSheet.create({
   },
   abbreviationMeaning: {
     fontSize: FontSize.sm,
+    color: Colors.textSecondary,
+  },
+
+  // Stitch Guide Card
+  stitchGuideCard: {
+    backgroundColor: Colors.surface,
+    borderRadius: BorderRadius.lg,
+    padding: Spacing.lg,
+    marginBottom: Spacing.lg,
+    borderWidth: 1,
+    borderColor: Colors.primaryLight + '30',
+    ...Shadow.small,
+  },
+  stitchGuideHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.sm,
+    marginBottom: Spacing.xs,
+  },
+  stitchGuideSubtitle: {
+    fontSize: FontSize.sm,
+    color: Colors.textLight,
+    marginBottom: Spacing.md,
+    fontStyle: 'italic',
+  },
+  stitchGuideList: {
+    gap: Spacing.sm,
+  },
+  stitchGuideRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: Spacing.xs,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.borderLight,
+  },
+  stitchGuideAbbr: {
+    width: 50,
+    fontSize: FontSize.md,
+    fontWeight: FontWeight.bold,
+    color: Colors.primary,
+  },
+  stitchGuideMeaning: {
+    flex: 1,
+    fontSize: FontSize.md,
     color: Colors.textSecondary,
   },
 
