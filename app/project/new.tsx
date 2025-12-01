@@ -1,6 +1,7 @@
 /**
  * New Project Screen
  * 3-stage AI transformation flow: Input → Processing → Preview & Save
+ * Neo-Brutalist "Retro Pop" design
  */
 
 import React, { useState, useCallback, useEffect, useRef } from 'react';
@@ -18,10 +19,10 @@ import {
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import * as Haptics from 'expo-haptics';
-import { Colors, Spacing, FontSize, FontWeight, BorderRadius, Shadow } from '@/constants/theme';
+import { StrokedText } from '@/components';
+import { Colors, Spacing, FontSize, Fonts, BorderRadius, NeoBrutalist } from '@/constants/theme';
 import { generateProjectFromImage, convertToProjectData } from '@/services/ai';
 import { ProjectStorage } from '@/services/storage';
 import { ProcessingStage, STAGE_INFO, AIGenerationResult } from '@/types/ai';
@@ -235,15 +236,20 @@ export default function NewProjectScreen() {
   const renderInputStage = () => (
     <View style={styles.stageContainer}>
       <View style={styles.inputContent}>
-        {/* Header */}
+        {/* Header with StrokedText */}
         <View style={styles.headerSection}>
-          <Text style={styles.stageTitle}>Transform Your Photo</Text>
+          <StrokedText fontSize={FontSize.hero} lineHeight={52} textAlign="center">
+            Transform
+          </StrokedText>
+          <StrokedText fontSize={FontSize.hero} lineHeight={52} textAlign="center">
+            your photo
+          </StrokedText>
           <Text style={styles.stageSubtitle}>
             Pick any photo and watch it become a cute crochet pattern!
           </Text>
         </View>
 
-        {/* Image Preview Area */}
+        {/* Image Preview Area - Dashed border Neo-Brutalist */}
         <TouchableOpacity
           style={styles.imagePickerArea}
           onPress={pickImageFromGallery}
@@ -257,25 +263,20 @@ export default function NewProjectScreen() {
             />
           ) : (
             <View style={styles.placeholderContent}>
-              <View style={styles.placeholderIcon}>
-                <Ionicons name="image-outline" size={48} color={Colors.primary} />
-              </View>
-              <Text style={styles.placeholderText}>Tap to select an image</Text>
-              <Text style={styles.placeholderHint}>
-                Choose a photo of anything you want to turn into a plushie
-              </Text>
+              <Text style={styles.placeholderEmoji}>📷</Text>
+              <Text style={styles.placeholderText}>tap to select photo</Text>
             </View>
           )}
         </TouchableOpacity>
 
-        {/* Image Source Buttons */}
+        {/* Image Source Buttons - Neo-Brutalist style */}
         <View style={styles.sourceButtons}>
           <TouchableOpacity
             style={styles.sourceButton}
             onPress={pickImageFromGallery}
             activeOpacity={0.8}
           >
-            <Ionicons name="images-outline" size={24} color={Colors.primary} />
+            <Text style={styles.sourceButtonEmoji}>🖼️</Text>
             <Text style={styles.sourceButtonText}>Gallery</Text>
           </TouchableOpacity>
 
@@ -284,13 +285,13 @@ export default function NewProjectScreen() {
             onPress={takePhoto}
             activeOpacity={0.8}
           >
-            <Ionicons name="camera-outline" size={24} color={Colors.primary} />
+            <Text style={styles.sourceButtonEmoji}>📸</Text>
             <Text style={styles.sourceButtonText}>Camera</Text>
           </TouchableOpacity>
         </View>
       </View>
 
-      {/* Create Button */}
+      {/* Create Button - Neo-Brutalist with solid border */}
       <TouchableOpacity
         style={[
           styles.primaryButton,
@@ -300,18 +301,14 @@ export default function NewProjectScreen() {
         disabled={!selectedImage}
         activeOpacity={0.8}
       >
-        <Ionicons
-          name="sparkles"
-          size={20}
-          color={selectedImage ? Colors.textOnPrimary : Colors.textLight}
-        />
+        <Text style={styles.buttonEmoji}>✨</Text>
         <Text
           style={[
             styles.primaryButtonText,
             !selectedImage && styles.primaryButtonTextDisabled,
           ]}
         >
-          Create Magic
+          create magic
         </Text>
       </TouchableOpacity>
     </View>
@@ -328,7 +325,7 @@ export default function NewProjectScreen() {
     return (
       <View style={styles.stageContainer}>
         <View style={styles.processingContent}>
-          {/* Animated Yarn Ball */}
+          {/* Animated Magic Wand - Neo-Brutalist */}
           <Animated.View
             style={[
               styles.yarnBallContainer,
@@ -338,7 +335,7 @@ export default function NewProjectScreen() {
             ]}
           >
             <View style={styles.yarnBall}>
-              <Ionicons name="color-wand" size={48} color={Colors.primary} />
+              <Text style={styles.processingEmoji}>🪄</Text>
             </View>
             {/* Decorative dots */}
             <View style={[styles.orbitDot, styles.orbitDot1]} />
@@ -346,11 +343,13 @@ export default function NewProjectScreen() {
             <View style={[styles.orbitDot, styles.orbitDot3]} />
           </Animated.View>
 
-          {/* Status Text */}
-          <Text style={styles.processingTitle}>Creating Your Pattern</Text>
+          {/* Status Text with StrokedText */}
+          <StrokedText fontSize={FontSize.xxl} lineHeight={40} textAlign="center">
+            Creating Magic
+          </StrokedText>
           <Text style={styles.processingStatus}>{stageInfo.message}</Text>
 
-          {/* Progress Bar */}
+          {/* Progress Bar - Neo-Brutalist */}
           <View style={styles.progressBarContainer}>
             <View style={styles.progressBarBackground}>
               <View
@@ -363,9 +362,9 @@ export default function NewProjectScreen() {
             <Text style={styles.progressText}>{stageInfo.progress}%</Text>
           </View>
 
-          {/* Tip */}
+          {/* Tip Card - Neo-Brutalist */}
           <View style={styles.tipContainer}>
-            <Ionicons name="bulb-outline" size={16} color={Colors.secondary} />
+            <Text style={styles.tipEmoji}>💡</Text>
             <Text style={styles.tipText}>
               This usually takes 30-60 seconds. The AI is crafting something special!
             </Text>
@@ -388,59 +387,63 @@ export default function NewProjectScreen() {
           contentContainerStyle={styles.previewScrollContent}
           showsVerticalScrollIndicator={false}
         >
-          {/* Success Header */}
+          {/* Success Header with StrokedText */}
           <View style={styles.successHeader}>
-            <View style={styles.successIcon}>
-              <Ionicons name="checkmark-circle" size={32} color={Colors.success} />
-            </View>
-            <Text style={styles.successTitle}>Pattern Ready!</Text>
+            <Text style={styles.successEmoji}>✅</Text>
+            <StrokedText fontSize={FontSize.xxl} lineHeight={36} textAlign="center">
+              Pattern Ready!
+            </StrokedText>
           </View>
 
-          {/* Image Comparison */}
+          {/* Image Comparison - Neo-Brutalist */}
           <View style={styles.comparisonContainer}>
             <View style={styles.comparisonItem}>
               <Text style={styles.comparisonLabel}>Your Photo</Text>
-              <Image
-                source={{ uri: originalImageUri }}
-                style={styles.comparisonImage}
-                contentFit="cover"
-              />
+              <View style={styles.comparisonImageWrapper}>
+                <Image
+                  source={{ uri: originalImageUri }}
+                  style={styles.comparisonImage}
+                  contentFit="cover"
+                />
+              </View>
             </View>
 
             <View style={styles.transformArrow}>
-              <Ionicons name="arrow-forward" size={24} color={Colors.primary} />
+              <Text style={styles.arrowEmoji}>➡️</Text>
             </View>
 
             <View style={styles.comparisonItem}>
               <Text style={styles.comparisonLabel}>Plushie Vision</Text>
-              <Image
-                source={{ uri: generatedImageUrl }}
-                style={styles.comparisonImage}
-                contentFit="cover"
-              />
+              <View style={styles.comparisonImageWrapper}>
+                <Image
+                  source={{ uri: generatedImageUrl }}
+                  style={styles.comparisonImage}
+                  contentFit="cover"
+                />
+              </View>
             </View>
           </View>
 
-          {/* Project Summary */}
+          {/* Project Summary - Neo-Brutalist Card */}
           <View style={styles.summaryCard}>
             <Text style={styles.projectName}>{pattern.projectName}</Text>
             <Text style={styles.projectDescription}>{pattern.description}</Text>
 
             <View style={styles.summaryDetails}>
               <View style={styles.summaryItem}>
-                <Ionicons name="speedometer-outline" size={20} color={Colors.accent} />
+                <Text style={styles.summaryEmoji}>📊</Text>
                 <Text style={styles.summaryLabel}>Difficulty</Text>
                 <Text style={styles.summaryValue}>{pattern.difficulty}</Text>
               </View>
 
               <View style={styles.summaryItem}>
-                <Ionicons name="time-outline" size={20} color={Colors.accent} />
+                <Text style={styles.summaryEmoji}>⏱️</Text>
                 <Text style={styles.summaryLabel}>Time</Text>
                 <Text style={styles.summaryValue}>{pattern.estimatedTime}</Text>
               </View>
 
               <View style={styles.summaryItem}>
-                <Ionicons name="color-palette-outline" size={20} color={Colors.accent} />
+                <Text style={styles.summaryEmoji}>🎨</Text>
                 <Text style={styles.summaryLabel}>Colors</Text>
                 <Text style={styles.summaryValue}>
                   {pattern.materials.yarns.length}
@@ -460,14 +463,14 @@ export default function NewProjectScreen() {
           </View>
         </ScrollView>
 
-        {/* Action Buttons */}
+        {/* Action Buttons - Neo-Brutalist */}
         <View style={styles.previewActions}>
           <TouchableOpacity
             style={styles.secondaryButton}
             onPress={resetFlow}
             activeOpacity={0.8}
           >
-            <Ionicons name="refresh-outline" size={20} color={Colors.primary} />
+            <Text style={styles.buttonEmoji}>🔄</Text>
             <Text style={styles.secondaryButtonText}>Try Again</Text>
           </TouchableOpacity>
 
@@ -476,7 +479,7 @@ export default function NewProjectScreen() {
             onPress={saveProject}
             activeOpacity={0.8}
           >
-            <Ionicons name="heart" size={20} color={Colors.textOnPrimary} />
+            <Text style={styles.buttonEmoji}>💖</Text>
             <Text style={styles.primaryButtonText}>Start Project</Text>
           </TouchableOpacity>
         </View>
@@ -541,38 +544,32 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.lg,
   },
 
-  // Stage 1: Input
+  // Stage 1: Input - Neo-Brutalist
   inputContent: {
     flex: 1,
-    paddingTop: Spacing.lg,
+    paddingTop: Spacing.md,
   },
   headerSection: {
     alignItems: 'center',
-    marginBottom: Spacing.xl,
-  },
-  stageTitle: {
-    fontSize: FontSize.xl,
-    fontWeight: FontWeight.bold,
-    color: Colors.text,
-    marginBottom: Spacing.xs,
-    textAlign: 'center',
+    marginBottom: Spacing.lg,
   },
   stageSubtitle: {
     fontSize: FontSize.md,
+    fontFamily: Fonts.light,
     color: Colors.textSecondary,
     textAlign: 'center',
     lineHeight: 22,
+    marginTop: Spacing.sm,
   },
   imagePickerArea: {
     width: '100%',
     aspectRatio: 1,
-    backgroundColor: Colors.surface,
-    borderRadius: BorderRadius.xl,
+    backgroundColor: Colors.card,
+    borderRadius: BorderRadius.lg,
     overflow: 'hidden',
     borderWidth: 2,
-    borderColor: Colors.border,
+    borderColor: NeoBrutalist.borderColor,
     borderStyle: 'dashed',
-    ...Shadow.small,
   },
   previewImage: {
     width: '100%',
@@ -584,25 +581,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: Spacing.lg,
   },
-  placeholderIcon: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: Colors.backgroundSecondary,
-    justifyContent: 'center',
-    alignItems: 'center',
+  placeholderEmoji: {
+    fontSize: 64,
     marginBottom: Spacing.md,
   },
   placeholderText: {
     fontSize: FontSize.lg,
-    fontWeight: FontWeight.semibold,
+    fontFamily: Fonts.heavy,
     color: Colors.text,
-    marginBottom: Spacing.xs,
-  },
-  placeholderHint: {
-    fontSize: FontSize.sm,
-    color: Colors.textLight,
-    textAlign: 'center',
   },
   sourceButtons: {
     flexDirection: 'row',
@@ -615,19 +601,22 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: Spacing.sm,
     paddingHorizontal: Spacing.lg,
-    backgroundColor: Colors.surface,
+    backgroundColor: Colors.card,
     borderRadius: BorderRadius.md,
-    borderWidth: 1,
-    borderColor: Colors.border,
+    borderWidth: NeoBrutalist.borderWidth,
+    borderColor: NeoBrutalist.borderColor,
     gap: Spacing.sm,
+  },
+  sourceButtonEmoji: {
+    fontSize: 20,
   },
   sourceButtonText: {
     fontSize: FontSize.md,
-    color: Colors.primary,
-    fontWeight: FontWeight.medium,
+    fontFamily: Fonts.heavy,
+    color: Colors.text,
   },
 
-  // Stage 2: Processing
+  // Stage 2: Processing - Neo-Brutalist
   processingContent: {
     flex: 1,
     justifyContent: 'center',
@@ -645,43 +634,43 @@ const styles = StyleSheet.create({
     width: 100,
     height: 100,
     borderRadius: 50,
-    backgroundColor: Colors.backgroundSecondary,
+    backgroundColor: Colors.card,
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 3,
-    borderColor: Colors.primaryLight,
-    ...Shadow.medium,
+    borderWidth: NeoBrutalist.borderWidth,
+    borderColor: NeoBrutalist.borderColor,
+  },
+  processingEmoji: {
+    fontSize: 48,
   },
   orbitDot: {
     position: 'absolute',
     width: 12,
     height: 12,
     borderRadius: 6,
+    borderWidth: 1,
+    borderColor: NeoBrutalist.borderColor,
   },
   orbitDot1: {
-    backgroundColor: Colors.secondary,
+    backgroundColor: Colors.primary,
     top: 10,
     right: 20,
   },
   orbitDot2: {
-    backgroundColor: Colors.primary,
+    backgroundColor: Colors.background,
     bottom: 15,
     left: 15,
   },
   orbitDot3: {
-    backgroundColor: Colors.secondaryLight,
+    backgroundColor: Colors.card,
     top: 50,
     left: 5,
   },
-  processingTitle: {
-    fontSize: FontSize.xl,
-    fontWeight: FontWeight.bold,
-    color: Colors.text,
-    marginBottom: Spacing.sm,
-  },
   processingStatus: {
     fontSize: FontSize.md,
+    fontFamily: Fonts.light,
     color: Colors.textSecondary,
+    marginTop: Spacing.sm,
     marginBottom: Spacing.xl,
   },
   progressBarContainer: {
@@ -692,40 +681,47 @@ const styles = StyleSheet.create({
   },
   progressBarBackground: {
     flex: 1,
-    height: 8,
-    backgroundColor: Colors.borderLight,
-    borderRadius: 4,
+    height: 12,
+    backgroundColor: Colors.card,
+    borderRadius: BorderRadius.sm,
     overflow: 'hidden',
+    borderWidth: NeoBrutalist.borderWidth,
+    borderColor: NeoBrutalist.borderColor,
   },
   progressBarFill: {
     height: '100%',
     backgroundColor: Colors.primary,
-    borderRadius: 4,
   },
   progressText: {
     marginLeft: Spacing.md,
-    fontSize: FontSize.sm,
-    color: Colors.textSecondary,
-    fontWeight: FontWeight.medium,
-    minWidth: 40,
+    fontSize: FontSize.md,
+    fontFamily: Fonts.heavy,
+    color: Colors.text,
+    minWidth: 45,
   },
   tipContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.surface,
-    paddingVertical: Spacing.sm,
-    paddingHorizontal: Spacing.md,
+    backgroundColor: Colors.card,
+    paddingVertical: Spacing.md,
+    paddingHorizontal: Spacing.lg,
     borderRadius: BorderRadius.md,
-    maxWidth: '90%',
+    borderWidth: NeoBrutalist.borderWidth,
+    borderColor: NeoBrutalist.borderColor,
+    maxWidth: '95%',
+  },
+  tipEmoji: {
+    fontSize: 18,
   },
   tipText: {
     fontSize: FontSize.sm,
+    fontFamily: Fonts.light,
     color: Colors.textSecondary,
     marginLeft: Spacing.sm,
     flex: 1,
   },
 
-  // Stage 3: Preview
+  // Stage 3: Preview - Neo-Brutalist
   previewScroll: {
     flex: 1,
   },
@@ -734,18 +730,13 @@ const styles = StyleSheet.create({
     paddingBottom: Spacing.lg,
   },
   successHeader: {
-    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: Spacing.lg,
   },
-  successIcon: {
-    marginRight: Spacing.sm,
-  },
-  successTitle: {
-    fontSize: FontSize.xl,
-    fontWeight: FontWeight.bold,
-    color: Colors.text,
+  successEmoji: {
+    fontSize: 32,
+    marginBottom: Spacing.sm,
   },
   comparisonContainer: {
     flexDirection: 'row',
@@ -759,35 +750,46 @@ const styles = StyleSheet.create({
   },
   comparisonLabel: {
     fontSize: FontSize.xs,
+    fontFamily: Fonts.heavy,
     color: Colors.textSecondary,
     marginBottom: Spacing.xs,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
   },
+  comparisonImageWrapper: {
+    borderRadius: BorderRadius.md,
+    borderWidth: NeoBrutalist.borderWidth,
+    borderColor: NeoBrutalist.borderColor,
+    overflow: 'hidden',
+  },
   comparisonImage: {
     width: (SCREEN_WIDTH - Spacing.lg * 2 - 60) / 2,
     aspectRatio: 1,
-    borderRadius: BorderRadius.lg,
-    backgroundColor: Colors.backgroundSecondary,
+    backgroundColor: Colors.card,
   },
   transformArrow: {
     width: 40,
     alignItems: 'center',
   },
+  arrowEmoji: {
+    fontSize: 24,
+  },
   summaryCard: {
-    backgroundColor: Colors.surface,
+    backgroundColor: Colors.card,
     borderRadius: BorderRadius.lg,
     padding: Spacing.lg,
-    ...Shadow.small,
+    borderWidth: NeoBrutalist.borderWidth,
+    borderColor: NeoBrutalist.borderColor,
   },
   projectName: {
     fontSize: FontSize.xl,
-    fontWeight: FontWeight.bold,
+    fontFamily: Fonts.heavy,
     color: Colors.text,
     marginBottom: Spacing.xs,
   },
   projectDescription: {
     fontSize: FontSize.md,
+    fontFamily: Fonts.light,
     color: Colors.textSecondary,
     lineHeight: 22,
     marginBottom: Spacing.lg,
@@ -798,19 +800,23 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.lg,
     paddingTop: Spacing.md,
     borderTopWidth: 1,
-    borderTopColor: Colors.borderLight,
+    borderTopColor: Colors.stroke,
   },
   summaryItem: {
     alignItems: 'center',
   },
+  summaryEmoji: {
+    fontSize: 20,
+  },
   summaryLabel: {
     fontSize: FontSize.xs,
-    color: Colors.textLight,
+    fontFamily: Fonts.light,
+    color: Colors.textSecondary,
     marginTop: Spacing.xs,
   },
   summaryValue: {
     fontSize: FontSize.md,
-    fontWeight: FontWeight.semibold,
+    fontFamily: Fonts.heavy,
     color: Colors.text,
     textTransform: 'capitalize',
   },
@@ -823,9 +829,8 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
-    borderWidth: 2,
-    borderColor: Colors.surface,
-    ...Shadow.small,
+    borderWidth: NeoBrutalist.borderWidth,
+    borderColor: NeoBrutalist.borderColor,
   },
   previewActions: {
     flexDirection: 'row',
@@ -833,7 +838,10 @@ const styles = StyleSheet.create({
     gap: Spacing.md,
   },
 
-  // Buttons
+  // Buttons - Neo-Brutalist
+  buttonEmoji: {
+    fontSize: 18,
+  },
   primaryButton: {
     flex: 1,
     flexDirection: 'row',
@@ -844,14 +852,15 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.md,
     gap: Spacing.sm,
     marginBottom: Spacing.md,
-    ...Shadow.medium,
+    borderWidth: NeoBrutalist.borderWidth,
+    borderColor: NeoBrutalist.borderColor,
   },
   primaryButtonDisabled: {
-    backgroundColor: Colors.borderLight,
+    backgroundColor: Colors.card,
   },
   primaryButtonText: {
     fontSize: FontSize.md,
-    fontWeight: FontWeight.semibold,
+    fontFamily: Fonts.heavy,
     color: Colors.textOnPrimary,
   },
   primaryButtonTextDisabled: {
@@ -862,17 +871,17 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: Colors.surface,
+    backgroundColor: Colors.card,
     paddingVertical: Spacing.md,
     borderRadius: BorderRadius.md,
-    borderWidth: 1,
-    borderColor: Colors.primary,
+    borderWidth: NeoBrutalist.borderWidth,
+    borderColor: NeoBrutalist.borderColor,
     gap: Spacing.sm,
     marginBottom: Spacing.md,
   },
   secondaryButtonText: {
     fontSize: FontSize.md,
-    fontWeight: FontWeight.semibold,
-    color: Colors.primary,
+    fontFamily: Fonts.heavy,
+    color: Colors.text,
   },
 });
