@@ -25,6 +25,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import ConfettiCannon from 'react-native-confetti-cannon';
+import { StitchTutorialModal } from '@/components';
 import { ProjectStorage } from '@/services/storage';
 import {
   Project,
@@ -54,15 +55,15 @@ const DIFFICULTY_COLORS: Record<DifficultyLevel, string> = {
   expert: Colors.error, // Red
 };
 
-// Standard crochet abbreviations reference guide
+// Standard crochet abbreviations reference guide (quick reference)
 const STITCH_GUIDE = [
-  { abbr: 'sc', meaning: 'single crochet' },
-  { abbr: 'inc', meaning: 'increase (2 sc in same stitch)' },
-  { abbr: 'dec', meaning: 'invisible decrease' },
-  { abbr: 'ch', meaning: 'chain' },
-  { abbr: 'sl st', meaning: 'slip stitch' },
-  { abbr: 'MR', meaning: 'magic ring' },
-  { abbr: 'FO', meaning: 'fasten off' },
+  { abbr: 'sc', name: 'Single Crochet', meaning: 'single crochet', instructions: ['Insert hook', 'Yarn over, pull through', 'Yarn over, pull through both loops'], image: null },
+  { abbr: 'inc', name: 'Increase', meaning: 'increase (2 sc in same stitch)', instructions: ['Work 1 sc', 'Work another sc in same stitch'], image: null },
+  { abbr: 'dec', name: 'Invisible Decrease', meaning: 'invisible decrease', instructions: ['Insert through front loops of 2 stitches', 'Yarn over, pull through', 'Yarn over, pull through all'], image: null },
+  { abbr: 'ch', name: 'Chain', meaning: 'chain', instructions: ['Yarn over', 'Pull through loop'], image: null },
+  { abbr: 'sl st', name: 'Slip Stitch', meaning: 'slip stitch', instructions: ['Insert hook', 'Yarn over, pull through stitch and loop'], image: null },
+  { abbr: 'MR', name: 'Magic Ring', meaning: 'magic ring', instructions: ['Wrap yarn twice around finger', 'Pull loop through', 'Work stitches into ring', 'Pull tight'], image: null },
+  { abbr: 'FO', name: 'Fasten Off', meaning: 'fasten off', instructions: ['Cut yarn', 'Pull through last loop', 'Weave in end'], image: null },
 ] as const;
 
 // Toast notification component
@@ -338,6 +339,7 @@ export default function PatternStudioScreen() {
   const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const confettiRef = useRef<ConfettiCannon | null>(null);
   const [showConfetti, setShowConfetti] = useState(false);
+  const [showStitchModal, setShowStitchModal] = useState(false);
 
   // Load project data
   useEffect(() => {
@@ -824,9 +826,18 @@ export default function PatternStudioScreen() {
 
       {/* Stitch Guide - Static Reference */}
       <View style={styles.stitchGuideCard}>
-        <View style={styles.stitchGuideHeader}>
-          <Ionicons name="book-outline" size={20} color={Colors.primary} />
-          <Text style={styles.cardTitle}>Stitch Guide</Text>
+        <View style={styles.stitchGuideHeaderRow}>
+          <View style={styles.stitchGuideHeader}>
+            <Ionicons name="book-outline" size={20} color={Colors.primary} />
+            <Text style={styles.cardTitle}>Stitch Guide</Text>
+          </View>
+          <TouchableOpacity
+            style={styles.visualGuideButton}
+            onPress={() => setShowStitchModal(true)}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.visualGuideButtonText}>Visual Guide 📖</Text>
+          </TouchableOpacity>
         </View>
         <Text style={styles.stitchGuideSubtitle}>Common crochet abbreviations</Text>
         <View style={styles.stitchGuideList}>
@@ -998,6 +1009,12 @@ export default function PatternStudioScreen() {
         instruction={editModal.instruction}
         onSave={handleEditSave}
         onCancel={() => setEditModal((prev) => ({ ...prev, visible: false }))}
+      />
+
+      {/* Stitch Tutorial Modal */}
+      <StitchTutorialModal
+        visible={showStitchModal}
+        onClose={() => setShowStitchModal(false)}
       />
     </View>
   );
@@ -1348,11 +1365,29 @@ const styles = StyleSheet.create({
     borderColor: Colors.primaryLight + '30',
     ...Shadow.small,
   },
+  stitchGuideHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: Spacing.xs,
+  },
   stitchGuideHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.sm,
-    marginBottom: Spacing.xs,
+  },
+  visualGuideButton: {
+    backgroundColor: Colors.backgroundSecondary,
+    paddingVertical: Spacing.xs,
+    paddingHorizontal: Spacing.md,
+    borderRadius: BorderRadius.md,
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  visualGuideButtonText: {
+    fontSize: FontSize.sm,
+    fontWeight: FontWeight.medium,
+    color: Colors.primary,
   },
   stitchGuideSubtitle: {
     fontSize: FontSize.sm,
