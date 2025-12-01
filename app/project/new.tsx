@@ -166,6 +166,29 @@ export default function NewProjectScreen() {
     }
   }, []);
 
+  // Show image source selection alert
+  const showImageSourceAlert = useCallback(() => {
+    Alert.alert(
+      'Select Photo',
+      'Choose how you want to add a photo',
+      [
+        {
+          text: '📷 Camera',
+          onPress: takePhoto,
+        },
+        {
+          text: '🖼️ Gallery',
+          onPress: pickImageFromGallery,
+        },
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+      ],
+      { cancelable: true }
+    );
+  }, [takePhoto, pickImageFromGallery]);
+
   // Start the AI generation process
   const startGeneration = useCallback(async () => {
     if (!selectedImage) {
@@ -235,6 +258,7 @@ export default function NewProjectScreen() {
   // Render Stage 1: Input
   const renderInputStage = () => (
     <View style={styles.stageContainer}>
+      {/* Top Section: Header + Image Picker */}
       <View style={styles.inputContent}>
         {/* Header with StrokedText */}
         <View style={styles.headerSection}>
@@ -244,15 +268,12 @@ export default function NewProjectScreen() {
           <StrokedText fontSize={FontSize.hero} lineHeight={52} textAlign="center">
             your photo
           </StrokedText>
-          <Text style={styles.stageSubtitle}>
-            Pick any photo and watch it become a cute crochet pattern!
-          </Text>
         </View>
 
         {/* Image Preview Area - Dashed border Neo-Brutalist */}
         <TouchableOpacity
           style={styles.imagePickerArea}
-          onPress={pickImageFromGallery}
+          onPress={showImageSourceAlert}
           activeOpacity={0.8}
         >
           {selectedImage ? (
@@ -263,53 +284,33 @@ export default function NewProjectScreen() {
             />
           ) : (
             <View style={styles.placeholderContent}>
-              <Text style={styles.placeholderEmoji}>📷</Text>
+              <Text style={styles.placeholderEmoji}>📸</Text>
               <Text style={styles.placeholderText}>tap to select photo</Text>
             </View>
           )}
         </TouchableOpacity>
-
-        {/* Image Source Buttons - Neo-Brutalist style */}
-        <View style={styles.sourceButtons}>
-          <TouchableOpacity
-            style={styles.sourceButton}
-            onPress={pickImageFromGallery}
-            activeOpacity={0.8}
-          >
-            <Text style={styles.sourceButtonEmoji}>🖼️</Text>
-            <Text style={styles.sourceButtonText}>Gallery</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.sourceButton}
-            onPress={takePhoto}
-            activeOpacity={0.8}
-          >
-            <Text style={styles.sourceButtonEmoji}>📸</Text>
-            <Text style={styles.sourceButtonText}>Camera</Text>
-          </TouchableOpacity>
-        </View>
       </View>
 
-      {/* Create Button - Neo-Brutalist with solid border */}
+      {/* Create Magic Button - Large card-like Neo-Brutalist */}
       <TouchableOpacity
         style={[
-          styles.primaryButton,
-          !selectedImage && styles.primaryButtonDisabled,
+          styles.createMagicButton,
+          !selectedImage && styles.createMagicButtonDisabled,
         ]}
         onPress={startGeneration}
         disabled={!selectedImage}
         activeOpacity={0.8}
       >
-        <Text style={styles.buttonEmoji}>✨</Text>
-        <Text
-          style={[
-            styles.primaryButtonText,
-            !selectedImage && styles.primaryButtonTextDisabled,
-          ]}
+        <Text style={styles.createMagicEmoji}>✨</Text>
+        <StrokedText
+          fontSize={FontSize.xl}
+          lineHeight={32}
+          textAlign="center"
+          color={selectedImage ? Colors.primary : Colors.textLight}
+          strokeColor={selectedImage ? Colors.stroke : 'transparent'}
         >
           create magic
-        </Text>
+        </StrokedText>
       </TouchableOpacity>
     </View>
   );
@@ -542,30 +543,23 @@ const styles = StyleSheet.create({
   stageContainer: {
     flex: 1,
     paddingHorizontal: Spacing.lg,
+    paddingTop: Spacing.md,
+    paddingBottom: Spacing.lg,
+    gap: 32, // ~5mm separation between cards
   },
 
-  // Stage 1: Input - Neo-Brutalist
+  // Stage 1: Input - Neo-Brutalist Two-Card Layout
   inputContent: {
     flex: 1,
-    paddingTop: Spacing.md,
   },
   headerSection: {
     alignItems: 'center',
-    marginBottom: Spacing.lg,
-  },
-  stageSubtitle: {
-    fontSize: FontSize.md,
-    fontFamily: Fonts.light,
-    color: Colors.textSecondary,
-    textAlign: 'center',
-    lineHeight: 22,
-    marginTop: Spacing.sm,
+    marginBottom: Spacing.md,
   },
   imagePickerArea: {
-    width: '100%',
-    aspectRatio: 1,
+    flex: 1,
     backgroundColor: Colors.card,
-    borderRadius: BorderRadius.lg,
+    borderRadius: BorderRadius.xl,
     overflow: 'hidden',
     borderWidth: 2,
     borderColor: NeoBrutalist.borderColor,
@@ -582,7 +576,7 @@ const styles = StyleSheet.create({
     padding: Spacing.lg,
   },
   placeholderEmoji: {
-    fontSize: 64,
+    fontSize: 48,
     marginBottom: Spacing.md,
   },
   placeholderText: {
@@ -590,30 +584,23 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.heavy,
     color: Colors.text,
   },
-  sourceButtons: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    marginTop: Spacing.lg,
-    gap: Spacing.md,
-  },
-  sourceButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: Spacing.sm,
-    paddingHorizontal: Spacing.lg,
+
+  // Create Magic Button - Large card-like
+  createMagicButton: {
+    height: 180,
     backgroundColor: Colors.card,
-    borderRadius: BorderRadius.md,
+    borderRadius: BorderRadius.xl,
     borderWidth: NeoBrutalist.borderWidth,
     borderColor: NeoBrutalist.borderColor,
+    justifyContent: 'center',
+    alignItems: 'center',
     gap: Spacing.sm,
   },
-  sourceButtonEmoji: {
-    fontSize: 20,
+  createMagicButtonDisabled: {
+    opacity: 0.6,
   },
-  sourceButtonText: {
-    fontSize: FontSize.md,
-    fontFamily: Fonts.heavy,
-    color: Colors.text,
+  createMagicEmoji: {
+    fontSize: 32,
   },
 
   // Stage 2: Processing - Neo-Brutalist
