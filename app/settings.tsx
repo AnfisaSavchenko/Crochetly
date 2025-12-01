@@ -141,7 +141,7 @@ export default function SettingsScreen() {
       >
         {/* App Info Section */}
         <View style={styles.section}>
-          <StrokedText fontSize={FontSize.xl} strokeWidth={1}>
+          <StrokedText fontSize={FontSize.xl} lineHeight={28} textAlign="left">
             App Info
           </StrokedText>
           <View style={styles.sectionContent}>
@@ -165,7 +165,7 @@ export default function SettingsScreen() {
 
         {/* Data Management Section */}
         <View style={styles.section}>
-          <StrokedText fontSize={FontSize.xl} strokeWidth={1}>
+          <StrokedText fontSize={FontSize.xl} lineHeight={28} textAlign="left">
             Data
           </StrokedText>
           <View style={styles.sectionContent}>
@@ -183,7 +183,7 @@ export default function SettingsScreen() {
 
         {/* Preferences Section */}
         <View style={styles.section}>
-          <StrokedText fontSize={FontSize.xl} strokeWidth={1}>
+          <StrokedText fontSize={FontSize.xl} lineHeight={28} textAlign="left">
             Preferences
           </StrokedText>
           <View style={styles.sectionContent}>

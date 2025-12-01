@@ -6,14 +6,15 @@
 import React from 'react';
 import {
   View,
-  Text,
   StyleSheet,
   TouchableOpacity,
   ViewStyle,
+  Text,
 } from 'react-native';
 import { Image } from 'expo-image';
-import { Colors, Spacing, FontSize, Fonts, BorderRadius, NeoBrutalist } from '@/constants/theme';
+import { Colors, Spacing, FontSize, BorderRadius, NeoBrutalist } from '@/constants/theme';
 import { ProjectSummary } from '@/types/project';
+import { StrokedText } from './StrokedText';
 
 interface ProjectCardProps {
   project: ProjectSummary;
@@ -48,11 +49,15 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
         )}
       </View>
 
-      {/* Title - Centered at bottom with stroked text effect */}
+      {/* Title - Centered at bottom with stroked text */}
       <View style={styles.titleContainer}>
-        <Text style={styles.title} numberOfLines={1}>
+        <StrokedText
+          fontSize={FontSize.md}
+          lineHeight={22}
+          numberOfLines={1}
+        >
           {project.name}
-        </Text>
+        </StrokedText>
       </View>
     </TouchableOpacity>
   );
@@ -88,16 +93,6 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.md,
     paddingHorizontal: Spacing.sm,
     alignItems: 'center',
-  },
-  title: {
-    fontFamily: Fonts.heavy,
-    fontSize: FontSize.md,
-    color: Colors.primary,
-    textAlign: 'center',
-    // Text stroke effect via shadow
-    textShadowColor: Colors.stroke,
-    textShadowOffset: { width: 0.8, height: 0.8 },
-    textShadowRadius: 0.5,
   },
 });
 

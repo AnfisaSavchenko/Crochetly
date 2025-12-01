@@ -15,10 +15,10 @@ export const Colors = {
   background: '#F3E8A3',
   backgroundSecondary: '#EDE399',
 
-  // Primary/Accent - Pastel Pink
-  primary: '#F4A6BB',
-  primaryLight: '#F8C4D4',
-  primaryDark: '#E8899F',
+  // Primary/Accent - Pastel Pink (exact: #ECA9BA)
+  primary: '#ECA9BA',
+  primaryLight: '#F4C4D0',
+  primaryDark: '#D9899A',
 
   // Card/Surface - Off-White
   surface: '#F2F2F2',
@@ -30,13 +30,13 @@ export const Colors = {
   borderLight: '#333333',
 
   // Secondary colors for variety
-  secondary: '#F4A6BB',
-  secondaryLight: '#F8C4D4',
-  secondaryDark: '#E8899F',
+  secondary: '#ECA9BA',
+  secondaryLight: '#F4C4D0',
+  secondaryDark: '#D9899A',
 
   // Accent colors
-  accent: '#F4A6BB',
-  accentLight: '#F8C4D4',
+  accent: '#ECA9BA',
+  accentLight: '#F4C4D0',
 
   // Text Colors
   text: '#000000',
@@ -44,7 +44,7 @@ export const Colors = {
   textLight: '#666666',
   textOnPrimary: '#000000',
   textOnSecondary: '#000000',
-  textPink: '#F4A6BB',
+  textPink: '#ECA9BA',
 
   // Utility Colors
   success: '#7DC97E',

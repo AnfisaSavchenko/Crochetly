@@ -102,9 +102,7 @@ export default function HomeScreen() {
       <View style={styles.header}>
         <StrokedText
           fontSize={FontSize.hero}
-          color={Colors.primary}
-          strokeColor={Colors.stroke}
-          strokeWidth={1.5}
+          textAlign="left"
         >
           Gallery
         </StrokedText>

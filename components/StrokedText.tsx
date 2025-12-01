@@ -1,12 +1,16 @@
 /**
  * StrokedText Component
- * Renders text with a black outline effect (Neo-Brutalist style)
- * Achieves the "Pink Text with Black Outline" look using text shadows
+ * Renders text with a black outline effect using the Layered Text technique
+ * Simulates CSS -webkit-text-stroke by rendering 4 black copies behind pink text
  */
 
 import React from 'react';
-import { Text, StyleSheet, TextStyle, StyleProp } from 'react-native';
-import { Colors, Fonts, FontSize } from '@/constants/theme';
+import { View, Text, StyleSheet, TextStyle, StyleProp } from 'react-native';
+import { Fonts, FontSize } from '@/constants/theme';
+
+// Default colors matching the design spec
+const DEFAULT_PINK = '#ECA9BA';
+const DEFAULT_STROKE = '#000000';
 
 interface StrokedTextProps {
   children: React.ReactNode;
@@ -14,108 +18,83 @@ interface StrokedTextProps {
   fontSize?: number;
   color?: string;
   strokeColor?: string;
-  strokeWidth?: number;
+  lineHeight?: number;
+  textAlign?: 'auto' | 'left' | 'right' | 'center' | 'justify';
+  numberOfLines?: number;
 }
 
 export const StrokedText: React.FC<StrokedTextProps> = ({
   children,
   style,
   fontSize = FontSize.hero,
-  color = Colors.primary,
-  strokeColor = Colors.stroke,
-  strokeWidth = 1.5,
+  color = DEFAULT_PINK,
+  strokeColor = DEFAULT_STROKE,
+  lineHeight = 45,
+  textAlign = 'center',
+  numberOfLines,
 }) => {
-  // Calculate outline offset for shadow effect
-  const outlineOffset = strokeWidth;
-
-  return (
-    <Text
-      style={[
-        styles.text,
-        {
-          fontSize,
-          color,
-          textShadowColor: strokeColor,
-          textShadowOffset: { width: outlineOffset, height: outlineOffset },
-          textShadowRadius: outlineOffset,
-        },
-        style,
-      ]}
-    >
-      {children}
-    </Text>
-  );
-};
-
-// Alternative implementation using layered text for more precise outline
-interface LayeredStrokedTextProps extends StrokedTextProps {
-  // Use layered approach for better outline on Android
-  useLayered?: boolean;
-}
-
-export const LayeredStrokedText: React.FC<LayeredStrokedTextProps> = ({
-  children,
-  style,
-  fontSize = FontSize.hero,
-  color = Colors.primary,
-  strokeColor = Colors.stroke,
-  strokeWidth = 2,
-}) => {
-  const offsets = [
-    { left: -strokeWidth, top: 0 },
-    { left: strokeWidth, top: 0 },
-    { left: 0, top: -strokeWidth },
-    { left: 0, top: strokeWidth },
-    { left: -strokeWidth, top: -strokeWidth },
-    { left: strokeWidth, top: -strokeWidth },
-    { left: -strokeWidth, top: strokeWidth },
-    { left: strokeWidth, top: strokeWidth },
+  // 4-direction offsets for stroke effect (1px in each cardinal direction)
+  const strokeOffsets = [
+    { top: -1, left: 0 },   // Top
+    { top: 1, left: 0 },    // Bottom
+    { top: 0, left: -1 },   // Left
+    { top: 0, left: 1 },    // Right
   ];
 
+  const baseTextStyle: TextStyle = {
+    fontFamily: Fonts.heavy,
+    fontSize,
+    lineHeight,
+    textAlign,
+  };
+
   return (
-    <>
-      {/* Stroke layers */}
-      {offsets.map((offset, index) => (
+    <View style={styles.container}>
+      {/* 4 Black stroke layers positioned behind */}
+      {strokeOffsets.map((offset, index) => (
         <Text
           key={index}
           style={[
-            styles.text,
-            styles.absoluteText,
+            baseTextStyle,
+            styles.strokeLayer,
             {
-              fontSize,
               color: strokeColor,
-              left: offset.left,
               top: offset.top,
+              left: offset.left,
             },
             style,
           ]}
+          numberOfLines={numberOfLines}
         >
           {children}
         </Text>
       ))}
-      {/* Main text on top */}
+
+      {/* Main pink text on top */}
       <Text
         style={[
-          styles.text,
+          baseTextStyle,
           {
-            fontSize,
             color,
           },
           style,
         ]}
+        numberOfLines={numberOfLines}
       >
         {children}
       </Text>
-    </>
+    </View>
   );
 };
 
+// Alternative export for backwards compatibility
+export const LayeredStrokedText = StrokedText;
+
 const styles = StyleSheet.create({
-  text: {
-    fontFamily: Fonts.heavy,
-    fontWeight: '900',
+  container: {
+    position: 'relative',
   },
-  absoluteText: {
+  strokeLayer: {
     position: 'absolute',
   },
 });
