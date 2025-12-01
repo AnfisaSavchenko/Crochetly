@@ -45,13 +45,13 @@ const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 type TabType = 'visuals' | 'pattern';
 
-// Difficulty color mapping
+// Difficulty color mapping - aligned with Pastel Pop palette
 const DIFFICULTY_COLORS: Record<DifficultyLevel, string> = {
-  beginner: '#81C784',
-  easy: '#AED581',
-  intermediate: '#FFB74D',
-  advanced: '#FF8A65',
-  expert: '#E57373',
+  beginner: Colors.success, // Green
+  easy: Colors.primary, // Purple - playful
+  intermediate: Colors.warning, // Yellow
+  advanced: Colors.secondary, // Pink
+  expert: Colors.error, // Red
 };
 
 // Standard crochet abbreviations reference guide
