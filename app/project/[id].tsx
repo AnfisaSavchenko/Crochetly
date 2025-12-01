@@ -17,8 +17,9 @@ import {
   Modal,
   Pressable,
   Dimensions,
+  Alert,
 } from 'react-native';
-import { useLocalSearchParams, useNavigation } from 'expo-router';
+import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { ProjectStorage } from '@/services/storage';
@@ -295,6 +296,7 @@ const EditModal: React.FC<EditModalProps> = ({
 export default function PatternStudioScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const navigation = useNavigation();
+  const router = useRouter();
   const insets = useSafeAreaInsets();
 
   const [project, setProject] = useState<Project | null>(null);
@@ -327,24 +329,61 @@ export default function PatternStudioScreen() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
+  // Handle project deletion
+  const handleDeleteProject = useCallback(() => {
+    if (!project) return;
+
+    Alert.alert(
+      'Delete this project?',
+      'This cannot be undone.',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await ProjectStorage.deleteProject(project.id);
+              router.replace('/');
+            } catch (err) {
+              console.error('Error deleting project:', err);
+              Alert.alert('Error', 'Failed to delete project. Please try again.');
+            }
+          },
+        },
+      ]
+    );
+  }, [project, router]);
+
   // Set navigation title
   useEffect(() => {
     if (project) {
       navigation.setOptions({
         title: project.name,
         headerRight: () => (
-          <TouchableOpacity
-            style={styles.headerButton}
-            onPress={() => {
-              // Future: Share functionality
-            }}
-          >
-            <Ionicons name="share-outline" size={24} color={Colors.text} />
-          </TouchableOpacity>
+          <View style={styles.headerRightContainer}>
+            <TouchableOpacity
+              style={styles.headerButton}
+              onPress={handleDeleteProject}
+            >
+              <Ionicons name="trash-outline" size={22} color={Colors.error} />
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.headerButton}
+              onPress={() => {
+                // Future: Share functionality
+              }}
+            >
+              <Ionicons name="share-outline" size={24} color={Colors.text} />
+            </TouchableOpacity>
+          </View>
         ),
       });
     }
-  }, [project, navigation]);
+  }, [project, navigation, handleDeleteProject]);
 
   // Auto-expand first section on load
   useEffect(() => {
@@ -958,6 +997,10 @@ const styles = StyleSheet.create({
     fontSize: FontSize.md,
     color: Colors.textSecondary,
     textAlign: 'center',
+  },
+  headerRightContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   headerButton: {
     padding: Spacing.sm,

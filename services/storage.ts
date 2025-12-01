@@ -49,11 +49,12 @@ export const ProjectStorage = {
 
   /**
    * Get project summaries for the gallery view
+   * Returns projects sorted by updatedAt in descending order (newest first)
    */
   async getProjectSummaries(): Promise<ProjectSummary[]> {
     try {
       const projects = await this.getAllProjects();
-      return projects.map((project) => ({
+      const summaries = projects.map((project) => ({
         id: project.id,
         name: project.name,
         status: project.status,
@@ -61,6 +62,12 @@ export const ProjectStorage = {
         progressPercentage: project.progressPercentage,
         updatedAt: project.updatedAt,
       }));
+      // Sort by updatedAt descending (newest first)
+      return summaries.sort((a, b) => {
+        const dateA = new Date(a.updatedAt).getTime();
+        const dateB = new Date(b.updatedAt).getTime();
+        return dateB - dateA;
+      });
     } catch (error) {
       console.error('Error getting project summaries:', error);
       return [];

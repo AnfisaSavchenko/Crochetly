@@ -3,7 +3,7 @@
  * Displays all projects with empty state for new users
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -15,7 +15,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
+import { useRouter, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { FAB, EmptyState, ProjectCard } from '@/components';
 import { ProjectStorage } from '@/services/storage';
@@ -35,7 +35,7 @@ export default function HomeScreen() {
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  // Load projects on mount
+  // Load projects when screen gains focus
   const loadProjects = useCallback(async () => {
     try {
       const summaries = await ProjectStorage.getProjectSummaries();
@@ -47,9 +47,12 @@ export default function HomeScreen() {
     }
   }, []);
 
-  useEffect(() => {
-    loadProjects();
-  }, [loadProjects]);
+  // Use useFocusEffect to refresh projects when returning to this screen
+  useFocusEffect(
+    useCallback(() => {
+      loadProjects();
+    }, [loadProjects])
+  );
 
   // Refresh handler
   const handleRefresh = useCallback(async () => {
