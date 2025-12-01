@@ -1,6 +1,6 @@
 /**
  * Settings Screen
- * App configuration, data management, and preferences
+ * Neo-Brutalist "Retro Pop" design
  */
 
 import React, { useState, useCallback } from 'react';
@@ -18,13 +18,14 @@ import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { ProjectStorage } from '@/services/storage';
+import { StrokedText } from '@/components';
 import {
   Colors,
   Spacing,
   FontSize,
-  FontWeight,
+  Fonts,
   BorderRadius,
-  Shadow,
+  NeoBrutalist,
 } from '@/constants/theme';
 
 const APP_VERSION = '1.0.0';
@@ -43,7 +44,7 @@ interface SettingsRowProps {
 
 const SettingsRow: React.FC<SettingsRowProps> = ({
   icon,
-  iconColor = Colors.primary,
+  iconColor = Colors.text,
   title,
   subtitle,
   value,
@@ -54,7 +55,7 @@ const SettingsRow: React.FC<SettingsRowProps> = ({
 }) => {
   const content = (
     <View style={styles.settingsRow}>
-      <View style={[styles.iconContainer, { backgroundColor: iconColor + '15' }]}>
+      <View style={styles.iconContainer}>
         <Ionicons name={icon} size={20} color={iconColor} />
       </View>
       <View style={styles.rowContent}>
@@ -68,14 +69,14 @@ const SettingsRow: React.FC<SettingsRowProps> = ({
       ) : value ? (
         <Text style={styles.rowValue}>{value}</Text>
       ) : showChevron ? (
-        <Ionicons name="chevron-forward" size={20} color={Colors.textLight} />
+        <Ionicons name="chevron-forward" size={20} color={Colors.text} />
       ) : null}
     </View>
   );
 
   if (onPress) {
     return (
-      <TouchableOpacity onPress={onPress} activeOpacity={0.7}>
+      <TouchableOpacity onPress={onPress} activeOpacity={0.8}>
         {content}
       </TouchableOpacity>
     );
@@ -140,11 +141,13 @@ export default function SettingsScreen() {
       >
         {/* App Info Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>App Info</Text>
+          <StrokedText fontSize={FontSize.xl} strokeWidth={1}>
+            App Info
+          </StrokedText>
           <View style={styles.sectionContent}>
             <View style={styles.appInfoHeader}>
               <View style={styles.appIconContainer}>
-                <Ionicons name="color-wand" size={32} color={Colors.primary} />
+                <Text style={styles.appEmoji}>🧶</Text>
               </View>
               <View style={styles.appInfoText}>
                 <Text style={styles.appName}>Hookgenie</Text>
@@ -162,7 +165,9 @@ export default function SettingsScreen() {
 
         {/* Data Management Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Data Management</Text>
+          <StrokedText fontSize={FontSize.xl} strokeWidth={1}>
+            Data
+          </StrokedText>
           <View style={styles.sectionContent}>
             <SettingsRow
               icon="trash-outline"
@@ -178,7 +183,9 @@ export default function SettingsScreen() {
 
         {/* Preferences Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Preferences</Text>
+          <StrokedText fontSize={FontSize.xl} strokeWidth={1}>
+            Preferences
+          </StrokedText>
           <View style={styles.sectionContent}>
             <SettingsRow
               icon="scale-outline"
@@ -195,30 +202,14 @@ export default function SettingsScreen() {
             />
           </View>
           <Text style={styles.sectionHint}>
-            Preference editing coming in a future update
+            Preference editing coming soon
           </Text>
-        </View>
-
-        {/* About Section */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>About</Text>
-          <View style={styles.sectionContent}>
-            <SettingsRow
-              icon="heart-outline"
-              iconColor={Colors.secondary}
-              title="Made with love for crafters"
-              subtitle="Powered by Newell AI"
-            />
-          </View>
         </View>
 
         {/* Footer */}
         <View style={styles.footer}>
           <Text style={styles.footerText}>
             Hookgenie {APP_VERSION}
-          </Text>
-          <Text style={styles.footerSubtext}>
-            Transform any photo into a crochet pattern
           </Text>
         </View>
       </ScrollView>
@@ -244,25 +235,18 @@ const styles = StyleSheet.create({
   section: {
     marginBottom: Spacing.xl,
   },
-  sectionTitle: {
-    fontSize: FontSize.sm,
-    fontWeight: FontWeight.semibold,
-    color: Colors.primary,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-    marginBottom: Spacing.sm,
-    marginLeft: Spacing.xs,
-  },
   sectionContent: {
-    backgroundColor: Colors.surface,
+    backgroundColor: Colors.card,
     borderRadius: BorderRadius.lg,
     overflow: 'hidden',
-    ...Shadow.small,
+    marginTop: Spacing.sm,
+    borderWidth: NeoBrutalist.borderWidth,
+    borderColor: NeoBrutalist.borderColor,
   },
   sectionHint: {
     fontSize: FontSize.xs,
-    color: Colors.textLight,
-    fontStyle: 'italic',
+    fontFamily: Fonts.light,
+    color: Colors.textSecondary,
     marginTop: Spacing.sm,
     marginLeft: Spacing.xs,
   },
@@ -277,21 +261,27 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: BorderRadius.md,
-    backgroundColor: Colors.primaryLight + '30',
+    backgroundColor: Colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: Spacing.md,
+    borderWidth: NeoBrutalist.borderWidth,
+    borderColor: NeoBrutalist.borderColor,
+  },
+  appEmoji: {
+    fontSize: 28,
   },
   appInfoText: {
     flex: 1,
   },
   appName: {
     fontSize: FontSize.xl,
-    fontWeight: FontWeight.bold,
+    fontFamily: Fonts.heavy,
     color: Colors.text,
   },
   appTagline: {
     fontSize: FontSize.sm,
+    fontFamily: Fonts.light,
     color: Colors.textSecondary,
     marginTop: 2,
   },
@@ -307,25 +297,30 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: BorderRadius.sm,
+    backgroundColor: Colors.background,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: Spacing.md,
+    borderWidth: 1,
+    borderColor: Colors.stroke,
   },
   rowContent: {
     flex: 1,
   },
   rowTitle: {
     fontSize: FontSize.md,
-    fontWeight: FontWeight.medium,
+    fontFamily: Fonts.heavy,
     color: Colors.text,
   },
   rowSubtitle: {
     fontSize: FontSize.sm,
+    fontFamily: Fonts.light,
     color: Colors.textSecondary,
     marginTop: 2,
   },
   rowValue: {
     fontSize: FontSize.md,
+    fontFamily: Fonts.light,
     color: Colors.textSecondary,
   },
   destructiveText: {
@@ -335,8 +330,8 @@ const styles = StyleSheet.create({
   // Divider
   divider: {
     height: 1,
-    backgroundColor: Colors.borderLight,
-    marginLeft: Spacing.lg + 36 + Spacing.md, // Align with text
+    backgroundColor: Colors.stroke,
+    marginLeft: Spacing.lg + 36 + Spacing.md,
   },
 
   // Footer
@@ -347,12 +342,7 @@ const styles = StyleSheet.create({
   },
   footerText: {
     fontSize: FontSize.sm,
-    fontWeight: FontWeight.medium,
-    color: Colors.textLight,
-  },
-  footerSubtext: {
-    fontSize: FontSize.xs,
-    color: Colors.textLight,
-    marginTop: Spacing.xs,
+    fontFamily: Fonts.light,
+    color: Colors.textSecondary,
   },
 });

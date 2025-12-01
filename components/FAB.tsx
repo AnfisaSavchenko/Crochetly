@@ -1,6 +1,6 @@
 /**
  * Floating Action Button Component
- * Prominent button for creating new projects
+ * Neo-Brutalist style - Pink fill with black border
  */
 
 import React from 'react';
@@ -10,7 +10,7 @@ import {
   ViewStyle,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors, Shadow } from '@/constants/theme';
+import { Colors, NeoBrutalist } from '@/constants/theme';
 
 interface FABProps {
   onPress: () => void;
@@ -39,8 +39,8 @@ export const FAB: React.FC<FABProps> = ({
   icon = 'add',
   style,
   size = 'large',
-  color = Colors.textOnPrimary,
-  backgroundColor = Colors.primary,
+  color = Colors.text, // Black icon
+  backgroundColor = Colors.primary, // Pink background
   testID,
 }) => {
   const buttonSize = SIZE_MAP[size];
@@ -74,7 +74,8 @@ const styles = StyleSheet.create({
     right: 24,
     justifyContent: 'center',
     alignItems: 'center',
-    ...Shadow.large,
+    borderWidth: NeoBrutalist.borderWidth,
+    borderColor: NeoBrutalist.borderColor,
   },
 });
 

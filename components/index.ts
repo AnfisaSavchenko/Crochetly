@@ -6,3 +6,4 @@
 export { FAB } from './FAB';
 export { EmptyState } from './EmptyState';
 export { ProjectCard } from './ProjectCard';
+export { StrokedText, LayeredStrokedText } from './StrokedText';

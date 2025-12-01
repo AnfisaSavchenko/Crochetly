@@ -1,6 +1,6 @@
 /**
  * Project Card Component
- * Displays a project summary in the gallery
+ * Neo-Brutalist style - Off-white card with black border
  */
 
 import React from 'react';
@@ -12,9 +12,8 @@ import {
   ViewStyle,
 } from 'react-native';
 import { Image } from 'expo-image';
-import { Ionicons } from '@expo/vector-icons';
-import { Colors, Spacing, FontSize, FontWeight, BorderRadius, Shadow } from '@/constants/theme';
-import { ProjectSummary, ProjectStatus } from '@/types/project';
+import { Colors, Spacing, FontSize, Fonts, BorderRadius, NeoBrutalist } from '@/constants/theme';
+import { ProjectSummary } from '@/types/project';
 
 interface ProjectCardProps {
   project: ProjectSummary;
@@ -22,73 +21,38 @@ interface ProjectCardProps {
   style?: ViewStyle;
 }
 
-const STATUS_CONFIG: Record<ProjectStatus, { label: string; color: string; icon: keyof typeof Ionicons.glyphMap }> = {
-  draft: { label: 'Draft', color: Colors.textLight, icon: 'document-outline' },
-  in_progress: { label: 'In Progress', color: Colors.primary, icon: 'construct-outline' },
-  completed: { label: 'Completed', color: Colors.success, icon: 'checkmark-circle-outline' },
-  archived: { label: 'Archived', color: Colors.textLight, icon: 'archive-outline' },
-};
-
 export const ProjectCard: React.FC<ProjectCardProps> = ({
   project,
   onPress,
   style,
 }) => {
-  const statusConfig = STATUS_CONFIG[project.status];
-  const hasProgress = typeof project.progressPercentage === 'number';
-
   return (
     <TouchableOpacity
       onPress={() => onPress(project)}
-      activeOpacity={0.8}
+      activeOpacity={0.85}
       style={[styles.container, style]}
     >
-      {/* Thumbnail */}
-      <View style={styles.thumbnailContainer}>
+      {/* Image Area - Takes most of card */}
+      <View style={styles.imageContainer}>
         {project.thumbnailUri ? (
           <Image
             source={{ uri: project.thumbnailUri }}
-            style={styles.thumbnail}
+            style={styles.image}
             contentFit="cover"
             transition={200}
           />
         ) : (
-          <View style={styles.placeholderThumbnail}>
-            <Ionicons name="image-outline" size={32} color={Colors.textLight} />
+          <View style={styles.placeholder}>
+            <Text style={styles.placeholderEmoji}>🧶</Text>
           </View>
         )}
-
-        {/* Status Badge */}
-        <View style={[styles.statusBadge, { backgroundColor: statusConfig.color + '20' }]}>
-          <Ionicons name={statusConfig.icon} size={12} color={statusConfig.color} />
-          <Text style={[styles.statusText, { color: statusConfig.color }]}>
-            {statusConfig.label}
-          </Text>
-        </View>
       </View>
 
-      {/* Content */}
-      <View style={styles.content}>
-        <Text style={styles.name} numberOfLines={2}>
+      {/* Title - Centered at bottom with stroked text effect */}
+      <View style={styles.titleContainer}>
+        <Text style={styles.title} numberOfLines={1}>
           {project.name}
         </Text>
-
-        {/* Progress Bar */}
-        {hasProgress && (
-          <View style={styles.progressContainer}>
-            <View style={styles.progressBar}>
-              <View
-                style={[
-                  styles.progressFill,
-                  { width: `${project.progressPercentage ?? 0}%` },
-                ]}
-              />
-            </View>
-            <Text style={styles.progressText}>
-              {Math.round(project.progressPercentage ?? 0)}%
-            </Text>
-          </View>
-        )}
       </View>
     </TouchableOpacity>
   );
@@ -96,72 +60,44 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: Colors.surface,
+    backgroundColor: Colors.card,
     borderRadius: BorderRadius.lg,
+    borderWidth: NeoBrutalist.borderWidth,
+    borderColor: NeoBrutalist.borderColor,
     overflow: 'hidden',
-    ...Shadow.small,
   },
-  thumbnailContainer: {
+  imageContainer: {
     width: '100%',
-    aspectRatio: 1,
-    position: 'relative',
+    aspectRatio: 0.9,
   },
-  thumbnail: {
+  image: {
     width: '100%',
     height: '100%',
   },
-  placeholderThumbnail: {
+  placeholder: {
     width: '100%',
     height: '100%',
-    backgroundColor: Colors.backgroundSecondary,
+    backgroundColor: Colors.card,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  statusBadge: {
-    position: 'absolute',
-    top: Spacing.sm,
-    left: Spacing.sm,
-    flexDirection: 'row',
-    alignItems: 'center',
+  placeholderEmoji: {
+    fontSize: 40,
+  },
+  titleContainer: {
+    paddingVertical: Spacing.md,
     paddingHorizontal: Spacing.sm,
-    paddingVertical: 4,
-    borderRadius: BorderRadius.sm,
-  },
-  statusText: {
-    fontSize: FontSize.xs,
-    fontWeight: FontWeight.medium,
-    marginLeft: 4,
-  },
-  content: {
-    padding: Spacing.md,
-  },
-  name: {
-    fontSize: FontSize.md,
-    fontWeight: FontWeight.semibold,
-    color: Colors.text,
-    marginBottom: Spacing.sm,
-  },
-  progressContainer: {
-    flexDirection: 'row',
     alignItems: 'center',
   },
-  progressBar: {
-    flex: 1,
-    height: 4,
-    backgroundColor: Colors.borderLight,
-    borderRadius: 2,
-    overflow: 'hidden',
-  },
-  progressFill: {
-    height: '100%',
-    backgroundColor: Colors.primary,
-    borderRadius: 2,
-  },
-  progressText: {
-    fontSize: FontSize.xs,
-    color: Colors.textLight,
-    marginLeft: Spacing.sm,
-    minWidth: 32,
+  title: {
+    fontFamily: Fonts.heavy,
+    fontSize: FontSize.md,
+    color: Colors.primary,
+    textAlign: 'center',
+    // Text stroke effect via shadow
+    textShadowColor: Colors.stroke,
+    textShadowOffset: { width: 0.8, height: 0.8 },
+    textShadowRadius: 0.5,
   },
 });
 

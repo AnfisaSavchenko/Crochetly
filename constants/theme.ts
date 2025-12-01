@@ -1,48 +1,60 @@
 /**
  * Hookgenie Theme Constants
- * "Pastel Pop" theme - vibrant, playful, Jellycat-inspired
+ * "Retro Pop" theme - Neo-Brutalist with bold borders and vibrant colors
  */
 
+// Font Family Constants
+export const Fonts = {
+  heavy: 'SFUIText-Heavy',
+  light: 'SFUIText-Light',
+  system: undefined, // Falls back to system font
+} as const;
+
 export const Colors = {
-  // Primary Colors - Purple
-  primary: '#A395EC',
-  primaryLight: '#C5BBF5',
-  primaryDark: '#7D6AD4',
+  // Primary Background - Custard Yellow
+  background: '#F3E8A3',
+  backgroundSecondary: '#EDE399',
 
-  // Secondary Colors - Pink
-  secondary: '#EBA9B9',
-  secondaryLight: '#F4D3DB',
-  secondaryDark: '#D48295',
+  // Primary/Accent - Pastel Pink
+  primary: '#F4A6BB',
+  primaryLight: '#F8C4D4',
+  primaryDark: '#E8899F',
 
-  // Background Colors - Off-White
-  background: '#F1F2ED',
-  backgroundSecondary: '#E8E9E4',
-  surface: '#FFFFFF',
+  // Card/Surface - Off-White
+  surface: '#F2F2F2',
+  card: '#F2F2F2',
 
-  // Accent Colors - Terracotta
-  accent: '#B65C2C',
-  accentLight: '#D57E4F',
+  // Stroke/Border - Black
+  stroke: '#000000',
+  border: '#000000',
+  borderLight: '#333333',
 
-  // Text Colors - Terracotta-based for warm feel
-  text: '#3E1F12', // Very dark terracotta for primary text
-  textSecondary: '#6D4535', // Medium terracotta for secondary text
-  textLight: '#9E7A6A', // Light terracotta for hints
-  textOnPrimary: '#FFFFFF',
-  textOnSecondary: '#3E1F12',
+  // Secondary colors for variety
+  secondary: '#F4A6BB',
+  secondaryLight: '#F8C4D4',
+  secondaryDark: '#E8899F',
+
+  // Accent colors
+  accent: '#F4A6BB',
+  accentLight: '#F8C4D4',
+
+  // Text Colors
+  text: '#000000',
+  textSecondary: '#333333',
+  textLight: '#666666',
+  textOnPrimary: '#000000',
+  textOnSecondary: '#000000',
+  textPink: '#F4A6BB',
 
   // Utility Colors
-  success: '#81C784',
-  warning: '#F2E08E', // Yellow from palette
+  success: '#7DC97E',
+  warning: '#F3E8A3',
   error: '#E57373',
   info: '#64B5F6',
 
-  // Border Colors
-  border: '#DDD9D0',
-  borderLight: '#E8E9E4',
-
-  // Shadow Colors - Purple-tinted
-  shadow: 'rgba(163, 149, 236, 0.12)',
-  shadowDark: 'rgba(163, 149, 236, 0.2)',
+  // Shadow color
+  shadow: 'rgba(0, 0, 0, 0.15)',
+  shadowDark: 'rgba(0, 0, 0, 0.25)',
 } as const;
 
 export const Spacing = {
@@ -55,10 +67,10 @@ export const Spacing = {
 } as const;
 
 export const BorderRadius = {
-  sm: 8,
-  md: 12,
-  lg: 16,
-  xl: 24,
+  sm: 12,
+  md: 16,
+  lg: 24,
+  xl: 32,
   round: 9999,
 } as const;
 
@@ -69,45 +81,64 @@ export const FontSize = {
   lg: 18,
   xl: 24,
   xxl: 32,
-  hero: 40,
+  hero: 48,
 } as const;
 
 export const FontWeight = {
+  light: '300' as const,
   regular: '400' as const,
   medium: '500' as const,
   semibold: '600' as const,
   bold: '700' as const,
+  heavy: '900' as const,
 };
+
+// Neo-Brutalist border style
+export const NeoBrutalist = {
+  borderWidth: 1.5,
+  borderColor: Colors.stroke,
+  borderRadius: BorderRadius.lg,
+} as const;
 
 export const Shadow = {
   small: {
     shadowColor: Colors.shadow,
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: { width: 2, height: 2 },
     shadowOpacity: 1,
-    shadowRadius: 4,
+    shadowRadius: 0,
     elevation: 2,
   },
   medium: {
     shadowColor: Colors.shadow,
-    shadowOffset: { width: 0, height: 4 },
+    shadowOffset: { width: 3, height: 3 },
     shadowOpacity: 1,
-    shadowRadius: 8,
+    shadowRadius: 0,
     elevation: 4,
   },
   large: {
     shadowColor: Colors.shadowDark,
-    shadowOffset: { width: 0, height: 8 },
+    shadowOffset: { width: 4, height: 4 },
     shadowOpacity: 1,
-    shadowRadius: 16,
+    shadowRadius: 0,
     elevation: 8,
+  },
+  // Neo-Brutalist hard shadow
+  brutal: {
+    shadowColor: '#000000',
+    shadowOffset: { width: 3, height: 3 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 4,
   },
 } as const;
 
 export default {
   Colors,
+  Fonts,
   Spacing,
   BorderRadius,
   FontSize,
   FontWeight,
+  NeoBrutalist,
   Shadow,
 };

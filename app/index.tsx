@@ -1,6 +1,6 @@
 /**
  * Home Screen - Project Gallery Dashboard
- * Displays all projects with empty state for new users
+ * Neo-Brutalist "Retro Pop" design
  */
 
 import React, { useState, useCallback } from 'react';
@@ -18,15 +18,15 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { FAB, EmptyState, ProjectCard } from '@/components';
+import { FAB, EmptyState, ProjectCard, StrokedText } from '@/components';
 import { ProjectStorage } from '@/services/storage';
 import { ProjectSummary } from '@/types/project';
-import { Colors, Spacing, FontSize, FontWeight, Shadow } from '@/constants/theme';
+import { Colors, Spacing, FontSize, Fonts, NeoBrutalist } from '@/constants/theme';
 
 const { width } = Dimensions.get('window');
-const CARD_MARGIN = Spacing.sm;
+const CARD_MARGIN = Spacing.md;
 const NUM_COLUMNS = 2;
-const CARD_WIDTH = (width - Spacing.lg * 2 - CARD_MARGIN * (NUM_COLUMNS - 1)) / NUM_COLUMNS;
+const CARD_WIDTH = (width - Spacing.lg * 2 - CARD_MARGIN) / NUM_COLUMNS;
 
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
@@ -80,9 +80,10 @@ export default function HomeScreen() {
         project={item}
         onPress={handleProjectPress}
         style={{
-          ...styles.card,
           width: CARD_WIDTH,
-          ...(isLeftColumn ? styles.cardLeft : styles.cardRight),
+          marginBottom: CARD_MARGIN,
+          marginRight: isLeftColumn ? CARD_MARGIN / 2 : 0,
+          marginLeft: isLeftColumn ? 0 : CARD_MARGIN / 2,
         }}
       />
     );
@@ -97,42 +98,26 @@ export default function HomeScreen() {
     <View style={[styles.container, { paddingTop: insets.top }]}>
       <StatusBar barStyle="dark-content" backgroundColor={Colors.background} />
 
-      {/* Header */}
+      {/* Header - Gallery Title with Stroked Text */}
       <View style={styles.header}>
-        <View>
-          <Text style={styles.greeting}>Welcome to</Text>
-          <View style={styles.titleContainer}>
-            <Ionicons name="color-wand" size={28} color={Colors.primary} />
-            <Text style={styles.title}>Hookgenie</Text>
-          </View>
-        </View>
+        <StrokedText
+          fontSize={FontSize.hero}
+          color={Colors.primary}
+          strokeColor={Colors.stroke}
+          strokeWidth={1.5}
+        >
+          Gallery
+        </StrokedText>
 
-        <View style={styles.headerRight}>
-          {hasProjects && (
-            <View style={styles.projectCount}>
-              <Text style={styles.countNumber}>{projects.length}</Text>
-              <Text style={styles.countLabel}>
-                {projects.length === 1 ? 'Project' : 'Projects'}
-              </Text>
-            </View>
-          )}
-          <TouchableOpacity
-            style={styles.settingsButton}
-            onPress={() => router.push('/settings')}
-            activeOpacity={0.7}
-          >
-            <Ionicons name="settings-outline" size={24} color={Colors.textSecondary} />
-          </TouchableOpacity>
-        </View>
+        {/* Settings Button */}
+        <TouchableOpacity
+          style={styles.settingsButton}
+          onPress={() => router.push('/settings')}
+          activeOpacity={0.8}
+        >
+          <Ionicons name="settings-outline" size={24} color={Colors.text} />
+        </TouchableOpacity>
       </View>
-
-      {/* Project Gallery Section Header */}
-      {hasProjects && (
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Project Gallery</Text>
-          <Ionicons name="grid-outline" size={20} color={Colors.textSecondary} />
-        </View>
-      )}
 
       {/* Content */}
       {isLoading ? (
@@ -180,81 +165,24 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'flex-start',
+    alignItems: 'center',
     paddingHorizontal: Spacing.lg,
-    paddingTop: Spacing.md,
+    paddingTop: Spacing.lg,
     paddingBottom: Spacing.lg,
-  },
-  greeting: {
-    fontSize: FontSize.md,
-    color: Colors.textSecondary,
-    marginBottom: 4,
-  },
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  title: {
-    fontSize: FontSize.xxl,
-    fontWeight: FontWeight.bold,
-    color: Colors.text,
-    marginLeft: Spacing.sm,
-  },
-  headerRight: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.sm,
-  },
-  projectCount: {
-    alignItems: 'center',
-    backgroundColor: Colors.surface,
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.sm,
-    borderRadius: 12,
-    ...Shadow.small,
   },
   settingsButton: {
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: Colors.surface,
+    backgroundColor: Colors.card,
     justifyContent: 'center',
     alignItems: 'center',
-    ...Shadow.small,
-  },
-  countNumber: {
-    fontSize: FontSize.xl,
-    fontWeight: FontWeight.bold,
-    color: Colors.primary,
-  },
-  countLabel: {
-    fontSize: FontSize.xs,
-    color: Colors.textSecondary,
-  },
-  sectionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: Spacing.lg,
-    marginBottom: Spacing.md,
-  },
-  sectionTitle: {
-    fontSize: FontSize.lg,
-    fontWeight: FontWeight.semibold,
-    color: Colors.text,
+    borderWidth: NeoBrutalist.borderWidth,
+    borderColor: NeoBrutalist.borderColor,
   },
   gallery: {
     paddingHorizontal: Spacing.lg,
-    paddingBottom: 100, // Account for FAB
-  },
-  card: {
-    marginBottom: Spacing.md,
-  },
-  cardLeft: {
-    marginRight: CARD_MARGIN / 2,
-  },
-  cardRight: {
-    marginLeft: CARD_MARGIN / 2,
+    paddingBottom: 120, // Account for FAB
   },
   loadingContainer: {
     flex: 1,
@@ -264,6 +192,7 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: Spacing.md,
     fontSize: FontSize.md,
+    fontFamily: Fonts.light,
     color: Colors.textSecondary,
   },
 });
