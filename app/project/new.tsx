@@ -20,6 +20,7 @@ import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
+import * as Haptics from 'expo-haptics';
 import { Colors, Spacing, FontSize, FontWeight, BorderRadius, Shadow } from '@/constants/theme';
 import { generateProjectFromImage, convertToProjectData } from '@/services/ai';
 import { ProjectStorage } from '@/services/storage';
@@ -179,13 +180,20 @@ export default function NewProjectScreen() {
       const result = await generateProjectFromImage(selectedImage, {
         onStageChange: (newStage) => {
           setProcessingStage(newStage);
+          // Haptic feedback for each stage completion
+          if (newStage !== 'idle') {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+          }
         },
         onError: (err, failedStage) => {
           console.error(`Error at stage ${failedStage}:`, err);
           setError(err.message);
+          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
         },
       });
 
+      // Success haptic when pattern is ready
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       setGenerationResult(result);
       setStage('preview');
     } catch (err) {

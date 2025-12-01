@@ -18,10 +18,13 @@ import {
   Pressable,
   Dimensions,
   Alert,
+  Share,
 } from 'react-native';
 import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import * as Haptics from 'expo-haptics';
+import ConfettiCannon from 'react-native-confetti-cannon';
 import { ProjectStorage } from '@/services/storage';
 import {
   Project,
@@ -322,6 +325,8 @@ export default function PatternStudioScreen() {
   });
 
   const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const confettiRef = useRef<ConfettiCannon | null>(null);
+  const [showConfetti, setShowConfetti] = useState(false);
 
   // Load project data
   useEffect(() => {
@@ -358,6 +363,26 @@ export default function PatternStudioScreen() {
     );
   }, [project, router]);
 
+  // Handle project sharing
+  const handleShareProject = useCallback(async () => {
+    if (!project) return;
+
+    try {
+      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+
+      const message = project.generatedImageUri
+        ? `Check out my crochet project "${project.name}" I'm making with Hookgenie! 🧶✨\n\n${project.generatedImageUri}`
+        : `Check out my crochet project "${project.name}" I'm making with Hookgenie! 🧶✨`;
+
+      await Share.share({
+        message,
+        title: project.name,
+      });
+    } catch (err) {
+      console.error('Error sharing project:', err);
+    }
+  }, [project]);
+
   // Set navigation title
   useEffect(() => {
     if (project) {
@@ -373,9 +398,7 @@ export default function PatternStudioScreen() {
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.headerButton}
-              onPress={() => {
-                // Future: Share functionality
-              }}
+              onPress={handleShareProject}
             >
               <Ionicons name="share-outline" size={24} color={Colors.text} />
             </TouchableOpacity>
@@ -383,7 +406,7 @@ export default function PatternStudioScreen() {
         ),
       });
     }
-  }, [project, navigation, handleDeleteProject]);
+  }, [project, navigation, handleDeleteProject, handleShareProject]);
 
   // Auto-expand first section on load
   useEffect(() => {
@@ -461,6 +484,9 @@ export default function PatternStudioScreen() {
     (sectionId: string, rowId: string) => {
       if (!project?.structuredPattern) return;
 
+      // Light haptic feedback for row toggle
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+
       const updatedSections = project.structuredPattern.sections.map((section) => {
         if (section.id !== sectionId) return section;
 
@@ -486,6 +512,7 @@ export default function PatternStudioScreen() {
           ?.rows.some((r) => !r.isCompleted);
 
       const newProgress = calculateProgress(updatedSections);
+      const wasNotComplete = (project.progressPercentage || 0) < 100;
 
       const updatedProject: Project = {
         ...project,
@@ -502,14 +529,17 @@ export default function PatternStudioScreen() {
 
       // Show celebration for section completion
       if (wasJustCompleted && updatedSection) {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
         showToast(`${updatedSection.name} complete!`, 'success');
       }
 
-      // Show celebration for project completion
-      if (newProgress === 100) {
+      // Show celebration for project completion with confetti!
+      if (newProgress === 100 && wasNotComplete) {
         setTimeout(() => {
+          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+          setShowConfetti(true);
           showToast('Project complete! Amazing work!', 'success');
-        }, 500);
+        }, 300);
       }
     },
     [project, calculateProgress, saveProject, showToast]
@@ -868,6 +898,21 @@ export default function PatternStudioScreen() {
 
   return (
     <View style={styles.container}>
+      {/* Confetti Celebration */}
+      {showConfetti && (
+        <ConfettiCannon
+          ref={confettiRef}
+          count={150}
+          origin={{ x: Dimensions.get('window').width / 2, y: -10 }}
+          autoStart
+          fadeOut
+          fallSpeed={3000}
+          explosionSpeed={350}
+          colors={[Colors.primary, Colors.secondary, Colors.accent, '#FFD700', '#FF69B4']}
+          onAnimationEnd={() => setShowConfetti(false)}
+        />
+      )}
+
       {/* Toast Notification */}
       <Toast {...toast} />
 
