@@ -13,6 +13,7 @@ import {
   Dimensions,
   StatusBar,
   ActivityIndicator,
+  TouchableOpacity,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter, useFocusEffect } from 'expo-router';
@@ -106,14 +107,23 @@ export default function HomeScreen() {
           </View>
         </View>
 
-        {hasProjects && (
-          <View style={styles.projectCount}>
-            <Text style={styles.countNumber}>{projects.length}</Text>
-            <Text style={styles.countLabel}>
-              {projects.length === 1 ? 'Project' : 'Projects'}
-            </Text>
-          </View>
-        )}
+        <View style={styles.headerRight}>
+          {hasProjects && (
+            <View style={styles.projectCount}>
+              <Text style={styles.countNumber}>{projects.length}</Text>
+              <Text style={styles.countLabel}>
+                {projects.length === 1 ? 'Project' : 'Projects'}
+              </Text>
+            </View>
+          )}
+          <TouchableOpacity
+            style={styles.settingsButton}
+            onPress={() => router.push('/settings')}
+            activeOpacity={0.7}
+          >
+            <Ionicons name="settings-outline" size={24} color={Colors.textSecondary} />
+          </TouchableOpacity>
+        </View>
       </View>
 
       {/* Project Gallery Section Header */}
@@ -190,12 +200,26 @@ const styles = StyleSheet.create({
     color: Colors.text,
     marginLeft: Spacing.sm,
   },
+  headerRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.sm,
+  },
   projectCount: {
     alignItems: 'center',
     backgroundColor: Colors.surface,
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.sm,
     borderRadius: 12,
+    ...Shadow.small,
+  },
+  settingsButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: Colors.surface,
+    justifyContent: 'center',
+    alignItems: 'center',
     ...Shadow.small,
   },
   countNumber: {
