@@ -226,14 +226,6 @@ export const StitchTutorialModal: React.FC<StitchTutorialModalProps> = ({
                 </StrokedText>
               </View>
 
-              {/* Image Placeholder */}
-              <View style={styles.imagePlaceholder}>
-                <Text style={styles.imagePlaceholderEmoji}>🧶</Text>
-                <Text style={styles.imagePlaceholderText}>
-                  Visual coming soon
-                </Text>
-              </View>
-
               {/* Instructions */}
               <View style={styles.instructionsContainer}>
                 <Text style={styles.instructionsTitle}>Steps:</Text>
@@ -323,26 +315,6 @@ const styles = StyleSheet.create({
     fontSize: FontSize.md,
     fontFamily: Fonts.heavy,
     color: Colors.textOnPrimary,
-  },
-  imagePlaceholder: {
-    backgroundColor: Colors.background,
-    borderRadius: BorderRadius.md,
-    borderWidth: 2,
-    borderColor: NeoBrutalist.borderColor,
-    borderStyle: 'dashed',
-    height: 120,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: Spacing.md,
-  },
-  imagePlaceholderEmoji: {
-    fontSize: 32,
-    marginBottom: Spacing.xs,
-  },
-  imagePlaceholderText: {
-    fontSize: FontSize.sm,
-    fontFamily: Fonts.light,
-    color: Colors.textSecondary,
   },
   instructionsContainer: {
     gap: Spacing.sm,
