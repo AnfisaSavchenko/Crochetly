@@ -494,31 +494,32 @@ export default function NewProjectScreen() {
 }
 
 /**
- * Helper to convert color names to hex codes for display
+ * Helper to convert color names to hex codes for display - Pastel Pop palette inspired
  */
 function getColorCode(colorName: string): string {
   const colorMap: Record<string, string> = {
-    'pastel pink': '#FFD1DC',
-    pink: '#FFC0CB',
-    blush: '#DE5D83',
-    cream: '#FFFDD0',
+    'pastel pink': '#F4D3DB',
+    pink: '#EBA9B9',
+    blush: '#D48295',
+    cream: '#F1F2ED',
     white: '#FFFFFF',
-    brown: '#8B4513',
-    'soft brown': '#A67B5B',
-    beige: '#F5F5DC',
-    tan: '#D2B48C',
-    gray: '#808080',
-    grey: '#808080',
-    black: '#333333',
-    blue: '#6495ED',
+    brown: '#B65C2C',
+    'soft brown': '#D57E4F',
+    beige: '#E8E9E4',
+    tan: '#D57E4F',
+    gray: '#9E9E9E',
+    grey: '#9E9E9E',
+    black: '#3E1F12',
+    blue: '#64B5F6',
     'soft blue': '#ADD8E6',
-    green: '#90EE90',
-    'sage green': '#9CAF88',
-    yellow: '#FFE4B5',
-    orange: '#FFA500',
-    red: '#FF6B6B',
-    purple: '#DDA0DD',
-    lavender: '#E6E6FA',
+    green: '#81C784',
+    'sage green': '#A5D6A7',
+    yellow: '#F2E08E',
+    orange: '#D57E4F',
+    red: '#E57373',
+    purple: '#A395EC',
+    lavender: '#C5BBF5',
+    terracotta: '#B65C2C',
   };
 
   const lowerColor = colorName.toLowerCase();

@@ -936,7 +936,7 @@ export default function PatternStudioScreen() {
           fadeOut
           fallSpeed={3000}
           explosionSpeed={350}
-          colors={[Colors.primary, Colors.secondary, Colors.accent, '#FFD700', '#FF69B4']}
+          colors={[Colors.primary, Colors.secondary, Colors.accent, Colors.warning, Colors.primaryLight]}
           onAnimationEnd={() => setShowConfetti(false)}
         />
       )}
@@ -1003,32 +1003,33 @@ export default function PatternStudioScreen() {
   );
 }
 
-// Helper function to get a color from a color name
+// Helper function to get a color from a color name - Pastel Pop palette inspired
 function getColorFromName(colorName: string): string {
   const colorMap: Record<string, string> = {
-    pink: '#E8B4B8',
-    blush: '#E8B4B8',
-    cream: '#F5F2EC',
+    pink: '#EBA9B9',
+    blush: '#F4D3DB',
+    cream: '#F1F2ED',
     white: '#FFFFFF',
-    brown: '#8D6E63',
-    black: '#3E2723',
+    brown: '#B65C2C',
+    black: '#3E1F12',
     blue: '#64B5F6',
     green: '#81C784',
-    sage: '#9CAF88',
-    yellow: '#FFD54F',
-    orange: '#FFB74D',
+    sage: '#A5D6A7',
+    yellow: '#F2E08E',
+    orange: '#D57E4F',
     red: '#E57373',
-    purple: '#BA68C8',
+    purple: '#A395EC',
     gray: '#9E9E9E',
     grey: '#9E9E9E',
-    beige: '#D7CCC8',
-    tan: '#BCAAA4',
-    peach: '#FFCCBC',
-    coral: '#FF8A65',
+    beige: '#E8E9E4',
+    tan: '#D57E4F',
+    peach: '#F4D3DB',
+    coral: '#D48295',
     mint: '#A5D6A7',
-    lavender: '#CE93D8',
+    lavender: '#C5BBF5',
     navy: '#5C6BC0',
     teal: '#4DB6AC',
+    terracotta: '#B65C2C',
   };
 
   const lowerName = colorName.toLowerCase();
