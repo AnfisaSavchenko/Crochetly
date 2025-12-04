@@ -1,5 +1,5 @@
 /**
- * Hookgenie Theme Constants
+ * Crochetly Theme Constants
  * "Retro Pop" theme - Neo-Brutalist with bold borders and vibrant colors
  */
 

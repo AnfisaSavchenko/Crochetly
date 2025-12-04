@@ -1,5 +1,5 @@
 /**
- * Hookgenie AI Service
+ * Crochetly AI Service
  * Multi-step AI pipeline for transforming photos into crochet patterns
  */
 

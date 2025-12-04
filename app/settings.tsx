@@ -150,7 +150,7 @@ export default function SettingsScreen() {
                 <Text style={styles.appEmoji}>🧶</Text>
               </View>
               <View style={styles.appInfoText}>
-                <Text style={styles.appName}>Hookgenie</Text>
+                <Text style={styles.appName}>Crochetly</Text>
                 <Text style={styles.appTagline}>AI-Powered Crochet Patterns</Text>
               </View>
             </View>
@@ -209,7 +209,7 @@ export default function SettingsScreen() {
         {/* Footer */}
         <View style={styles.footer}>
           <Text style={styles.footerText}>
-            Hookgenie {APP_VERSION}
+            Crochetly {APP_VERSION}
           </Text>
         </View>
       </ScrollView>

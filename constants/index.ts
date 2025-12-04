@@ -1,5 +1,5 @@
 /**
- * Hookgenie Constants Index
+ * Crochetly Constants Index
  * Central export for all constants
  */
 

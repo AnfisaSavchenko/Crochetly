@@ -1,5 +1,5 @@
 /**
- * Hookgenie AI Types
+ * Crochetly AI Types
  * Types for AI generation pipeline results
  */
 

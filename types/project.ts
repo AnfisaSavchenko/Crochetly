@@ -1,5 +1,5 @@
 /**
- * Hookgenie Project Types
+ * Crochetly Project Types
  * Types for crochet projects and related data
  */
 

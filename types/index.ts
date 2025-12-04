@@ -1,5 +1,5 @@
 /**
- * Hookgenie Types Index
+ * Crochetly Types Index
  * Central export for all types
  */
 

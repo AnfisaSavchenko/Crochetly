@@ -1,5 +1,5 @@
 /**
- * Hookgenie Components Index
+ * Crochetly Components Index
  * Central export for all components
  */
 

@@ -1,5 +1,5 @@
 /**
- * Hookgenie Storage Service
+ * Crochetly Storage Service
  * AsyncStorage utilities for saving and retrieving project data
  */
 
@@ -8,9 +8,9 @@ import { Project, ProjectSummary, NewProject } from '@/types/project';
 
 // Storage Keys
 const STORAGE_KEYS = {
-  PROJECTS: '@hookgenie:projects',
-  PROJECT_PREFIX: '@hookgenie:project:',
-  USER_PREFERENCES: '@hookgenie:preferences',
+  PROJECTS: '@crochetly:projects',
+  PROJECT_PREFIX: '@crochetly:project:',
+  USER_PREFERENCES: '@crochetly:preferences',
 } as const;
 
 /**

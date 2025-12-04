@@ -1,6 +1,6 @@
 /**
  * Root Layout
- * Main navigation structure for Hookgenie with custom font loading
+ * Main navigation structure for Crochetly with custom font loading
  */
 
 import { useEffect } from 'react';
