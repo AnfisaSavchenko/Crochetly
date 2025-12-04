@@ -384,8 +384,8 @@ export default function PatternStudioScreen() {
       await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 
       const message = project.generatedImageUri
-        ? `Check out my crochet project "${project.name}" I'm making with Crochetly! 🧶✨\n\n${project.generatedImageUri}`
-        : `Check out my crochet project "${project.name}" I'm making with Crochetly! 🧶✨`;
+        ? `Check out my crochet project "${project.name}" I'm making with @crochetly! 🧶✨\n\n${project.generatedImageUri}`
+        : `Check out my crochet project "${project.name}" I'm making with @crochetly! 🧶✨`;
 
       await Share.share({
         message,
