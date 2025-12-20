@@ -19,7 +19,6 @@ import {
   CTAButton,
   RevealCard,
 } from './components';
-import { OnboardingStorage } from '@/services/onboardingStorage';
 import { Colors, Spacing, FontSize, Fonts } from '@/constants/theme';
 
 export default function WellBeingScreen() {
@@ -30,14 +29,10 @@ export default function WellBeingScreen() {
   const handleContinue = async () => {
     try {
       setIsLoading(true);
-      // Mark Phase 1 & 2 as complete
-      // In Phase 3 & 4, we'll collect quiz data before completing onboarding
-      // For now, we'll just navigate back to home
-      // TODO: Navigate to quiz screens when Phase 3 & 4 are implemented
-      await OnboardingStorage.setOnboardingCompleted();
-      router.replace('/');
+      // Navigate to skill level quiz
+      router.push('/onboarding/skill-level');
     } catch (error) {
-      console.error('Error completing onboarding:', error);
+      console.error('Error navigating:', error);
     } finally {
       setIsLoading(false);
     }

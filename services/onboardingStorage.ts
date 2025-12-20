@@ -10,7 +10,7 @@ const QUIZ_DATA_KEY = '@crochetly:quiz_data';
 
 export interface QuizData {
   skillLevel?: 'beginner' | 'intermediate' | 'advanced';
-  intent?: 'relaxation' | 'gifts' | 'business' | 'learning';
+  intent?: string; // Comma-separated list of selected intents
 }
 
 export class OnboardingStorage {

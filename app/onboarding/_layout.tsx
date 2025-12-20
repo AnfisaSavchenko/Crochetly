@@ -20,6 +20,9 @@ export default function OnboardingLayout() {
       <Stack.Screen name="welcome" />
       <Stack.Screen name="time-fact" />
       <Stack.Screen name="well-being" />
+      <Stack.Screen name="skill-level" />
+      <Stack.Screen name="creation-intent" />
+      <Stack.Screen name="auth" />
     </Stack>
   );
 }

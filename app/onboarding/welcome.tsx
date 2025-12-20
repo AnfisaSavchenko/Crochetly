@@ -67,6 +67,9 @@ export default function WelcomeScreen() {
           Turn any photo into a crochet pattern made just for you.
         </Text>
 
+        {/* Spacer to push button up */}
+        <View style={styles.spacer} />
+
         {/* CTA Button */}
         <CTAButton
           title="Get Started"
@@ -90,10 +93,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.lg,
   },
   progressContainer: {
-    marginBottom: Spacing.xl,
+    marginBottom: Spacing.lg,
   },
   titleContainer: {
-    marginBottom: Spacing.xl,
+    marginBottom: Spacing.lg,
     alignItems: 'center',
   },
   card: {
@@ -101,15 +104,15 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: Colors.stroke,
     borderRadius: BorderRadius.lg,
-    padding: Spacing.xxl,
+    padding: Spacing.xl,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: Spacing.xl,
-    minHeight: 200,
+    marginBottom: Spacing.lg,
+    minHeight: 160,
     ...Shadow.brutal,
   },
   emoji: {
-    fontSize: 120,
+    fontSize: 100,
   },
   subtitle: {
     fontSize: FontSize.lg,
@@ -124,10 +127,14 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.light,
     color: Colors.textSecondary,
     textAlign: 'center',
-    marginBottom: Spacing.xxl,
+    marginBottom: Spacing.md,
     lineHeight: 24,
+  },
+  spacer: {
+    height: Spacing.md,
   },
   ctaButton: {
     width: '100%',
+    marginBottom: Spacing.lg,
   },
 });
