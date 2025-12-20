@@ -28,6 +28,9 @@ export default function WelcomeScreen() {
     router.push('/onboarding/time-fact');
   };
 
+  // Calculate personalization bar height
+  const personalizationBarHeight = 70 + insets.bottom;
+
   return (
     <View style={styles.container}>
       <ScrollView
@@ -35,7 +38,7 @@ export default function WelcomeScreen() {
           styles.content,
           {
             paddingTop: insets.top + Spacing.xl,
-            paddingBottom: 120, // Space for PersonalizationBar
+            paddingBottom: personalizationBarHeight + Spacing.xl,
           },
         ]}
         showsVerticalScrollIndicator={false}

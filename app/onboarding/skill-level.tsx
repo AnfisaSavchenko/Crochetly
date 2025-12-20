@@ -64,6 +64,9 @@ export default function SkillLevelScreen() {
     }
   };
 
+  // Calculate personalization bar height
+  const personalizationBarHeight = 70 + insets.bottom;
+
   return (
     <View style={styles.container}>
       <ScrollView
@@ -71,7 +74,7 @@ export default function SkillLevelScreen() {
           styles.content,
           {
             paddingTop: insets.top + Spacing.xl,
-            paddingBottom: 120,
+            paddingBottom: personalizationBarHeight + Spacing.xl,
           },
         ]}
         showsVerticalScrollIndicator={false}

@@ -15,7 +15,7 @@ import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StrokedText } from '@/components';
 import { AuthButton } from './components';
-import { OnboardingStorage } from '@/services/onboardingStorage';
+import { AuthService } from '@/services/authService';
 import { Colors, Spacing, FontSize, Fonts } from '@/constants/theme';
 
 export default function AuthScreen() {
@@ -24,28 +24,26 @@ export default function AuthScreen() {
   const [isLoadingApple, setIsLoadingApple] = useState(false);
   const [isLoadingGoogle, setIsLoadingGoogle] = useState(false);
 
-  const handleAuthComplete = async () => {
-    try {
-      // Mark onboarding as completed
-      await OnboardingStorage.setOnboardingCompleted();
-      // Navigate to main app
-      router.replace('/');
-    } catch (error) {
-      console.error('Error completing onboarding:', error);
-      Alert.alert('Error', 'Failed to complete onboarding. Please try again.');
-    }
-  };
-
   const handleAppleSignIn = async () => {
     setIsLoadingApple(true);
     try {
-      // TODO: Implement Apple Sign In
-      // For now, simulate authentication
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      await handleAuthComplete();
+      const result = await AuthService.completeOnboardingWithAuth('apple');
+
+      if (result.success) {
+        // Navigate to main app
+        router.replace('/');
+      } else {
+        Alert.alert(
+          'Authentication Error',
+          result.error || 'Failed to sign in with Apple. Please try again.'
+        );
+      }
     } catch (error) {
       console.error('Apple Sign In error:', error);
-      Alert.alert('Error', 'Apple Sign In is not available yet. Please try Google.');
+      Alert.alert(
+        'Error',
+        'An unexpected error occurred. Please try again.'
+      );
     } finally {
       setIsLoadingApple(false);
     }
@@ -54,13 +52,23 @@ export default function AuthScreen() {
   const handleGoogleSignIn = async () => {
     setIsLoadingGoogle(true);
     try {
-      // TODO: Implement Google Sign In
-      // For now, simulate authentication
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      await handleAuthComplete();
+      const result = await AuthService.completeOnboardingWithAuth('google');
+
+      if (result.success) {
+        // Navigate to main app
+        router.replace('/');
+      } else {
+        Alert.alert(
+          'Authentication Error',
+          result.error || 'Failed to sign in with Google. Please try again.'
+        );
+      }
     } catch (error) {
       console.error('Google Sign In error:', error);
-      Alert.alert('Error', 'Google Sign In is not available yet.');
+      Alert.alert(
+        'Error',
+        'An unexpected error occurred. Please try again.'
+      );
     } finally {
       setIsLoadingGoogle(false);
     }
