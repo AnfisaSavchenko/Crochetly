@@ -18,6 +18,7 @@ import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { ProjectStorage } from '@/services/storage';
+import { OnboardingStorage } from '@/services/onboardingStorage';
 import { StrokedText } from '@/components';
 import {
   Colors,
@@ -89,6 +90,7 @@ export default function SettingsScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const [isClearing, setIsClearing] = useState(false);
+  const [isResettingOnboarding, setIsResettingOnboarding] = useState(false);
 
   // Handle clear all data
   const handleClearAllData = useCallback(async () => {
@@ -125,6 +127,46 @@ export default function SettingsScreen() {
               Alert.alert('Error', 'Failed to clear data. Please try again.');
             } finally {
               setIsClearing(false);
+            }
+          },
+        },
+      ]
+    );
+  }, [router]);
+
+  // Handle reset onboarding
+  const handleResetOnboarding = useCallback(async () => {
+    Alert.alert(
+      'Reset Onboarding',
+      'This will reset your onboarding progress and show you the welcome screens again. Continue?',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Reset',
+          onPress: async () => {
+            setIsResettingOnboarding(true);
+            try {
+              await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+              await OnboardingStorage.resetOnboarding();
+              Alert.alert(
+                'Onboarding Reset',
+                'You will see the welcome screens on next app launch.',
+                [
+                  {
+                    text: 'OK',
+                    onPress: () => router.replace('/onboarding/welcome'),
+                  },
+                ]
+              );
+            } catch (error) {
+              console.error('Error resetting onboarding:', error);
+              await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+              Alert.alert('Error', 'Failed to reset onboarding. Please try again.');
+            } finally {
+              setIsResettingOnboarding(false);
             }
           },
         },
@@ -169,6 +211,15 @@ export default function SettingsScreen() {
             Data
           </StrokedText>
           <View style={styles.sectionContent}>
+            <SettingsRow
+              icon="reload-outline"
+              iconColor={Colors.info}
+              title="Reset Onboarding"
+              subtitle="See the welcome screens again"
+              onPress={handleResetOnboarding}
+              isLoading={isResettingOnboarding}
+            />
+            <View style={styles.divider} />
             <SettingsRow
               icon="trash-outline"
               iconColor={Colors.error}

@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "Crochetly",
-    "slug": "crochetly",
+    "name": "Hookgenie",
+    "slug": "hookgenie",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "crochetly",
+    "scheme": "fastshot",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "ios": {

@@ -3,7 +3,7 @@
  * Neo-Brutalist "Retro Pop" design
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
   View,
   Text,
@@ -16,10 +16,11 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useRouter, useFocusEffect } from 'expo-router';
+import { useRouter, useFocusEffect, Redirect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { FAB, EmptyState, ProjectCard, StrokedText } from '@/components';
 import { ProjectStorage } from '@/services/storage';
+import { OnboardingStorage } from '@/services/onboardingStorage';
 import { ProjectSummary } from '@/types/project';
 import { Colors, Spacing, FontSize, Fonts, NeoBrutalist } from '@/constants/theme';
 
@@ -35,6 +36,16 @@ export default function HomeScreen() {
   const [projects, setProjects] = useState<ProjectSummary[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isOnboardingCompleted, setIsOnboardingCompleted] = useState<boolean | null>(null);
+
+  // Check onboarding status on mount
+  useEffect(() => {
+    const checkOnboarding = async () => {
+      const completed = await OnboardingStorage.isOnboardingCompleted();
+      setIsOnboardingCompleted(completed);
+    };
+    checkOnboarding();
+  }, []);
 
   // Load projects when screen gains focus
   const loadProjects = useCallback(async () => {
@@ -93,6 +104,20 @@ export default function HomeScreen() {
   const keyExtractor = useCallback((item: ProjectSummary) => item.id, []);
 
   const hasProjects = projects.length > 0;
+
+  // Redirect to onboarding if not completed
+  if (isOnboardingCompleted === false) {
+    return <Redirect href="/onboarding/welcome" />;
+  }
+
+  // Show loading while checking onboarding status
+  if (isOnboardingCompleted === null) {
+    return (
+      <View style={[styles.container, styles.loadingContainer]}>
+        <ActivityIndicator size="large" color={Colors.primary} />
+      </View>
+    );
+  }
 
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
