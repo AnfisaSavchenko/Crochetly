@@ -1,76 +1,75 @@
 /**
  * Onboarding Screen 6: Authorization Gate
- * Final screen with Apple/Google sign-in options
+ * Final screen with Apple/Google sign-in options using @fastshot/auth
  */
 
-import React, { useState } from 'react';
+import React, { useEffect } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   ScrollView,
   Alert,
+  Platform,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useGoogleSignIn, useAppleSignIn } from '@fastshot/auth';
+import { supabase } from '@/services/supabaseClient';
 import { StrokedText } from '@/components';
 import { AuthButton } from './components';
-import { AuthService } from '@/services/authService';
 import { Colors, Spacing, FontSize, Fonts } from '@/constants/theme';
 
 export default function AuthScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const [isLoadingApple, setIsLoadingApple] = useState(false);
-  const [isLoadingGoogle, setIsLoadingGoogle] = useState(false);
 
-  const handleAppleSignIn = async () => {
-    setIsLoadingApple(true);
-    try {
-      const result = await AuthService.completeOnboardingWithAuth('apple');
+  // @fastshot/auth hooks for OAuth
+  const { signIn: googleSignIn, isLoading: googleLoading } = useGoogleSignIn({
+    supabaseClient: supabase,
+  });
 
-      if (result.success) {
-        // Navigate to main app
+  const { signIn: appleSignIn, isLoading: appleLoading } = useAppleSignIn({
+    supabaseClient: supabase,
+  });
+
+  // Check if user is already authenticated
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        // User is already authenticated, navigate to home
         router.replace('/');
-      } else {
-        Alert.alert(
-          'Authentication Error',
-          result.error || 'Failed to sign in with Apple. Please try again.'
-        );
       }
-    } catch (error) {
-      console.error('Apple Sign In error:', error);
-      Alert.alert(
-        'Error',
-        'An unexpected error occurred. Please try again.'
-      );
-    } finally {
-      setIsLoadingApple(false);
-    }
-  };
+    };
+    checkAuth();
+  }, [router]);
 
   const handleGoogleSignIn = async () => {
-    setIsLoadingGoogle(true);
     try {
-      const result = await AuthService.completeOnboardingWithAuth('google');
-
-      if (result.success) {
-        // Navigate to main app
-        router.replace('/');
-      } else {
-        Alert.alert(
-          'Authentication Error',
-          result.error || 'Failed to sign in with Google. Please try again.'
-        );
-      }
+      await googleSignIn();
+      // Note: Navigation will happen after auth callback in _layout.tsx
+      // The auth callback will save profile data and mark onboarding complete
     } catch (error) {
       console.error('Google Sign In error:', error);
       Alert.alert(
-        'Error',
-        'An unexpected error occurred. Please try again.'
+        'Authentication Error',
+        'Failed to sign in with Google. Please try again.'
       );
-    } finally {
-      setIsLoadingGoogle(false);
+    }
+  };
+
+  const handleAppleSignIn = async () => {
+    try {
+      await appleSignIn();
+      // Note: Navigation will happen after auth callback in _layout.tsx
+      // The auth callback will save profile data and mark onboarding complete
+    } catch (error) {
+      console.error('Apple Sign In error:', error);
+      Alert.alert(
+        'Authentication Error',
+        'Failed to sign in with Apple. Please try again.'
+      );
     }
   };
 
@@ -103,18 +102,20 @@ export default function AuthScreen() {
 
         {/* Auth Buttons */}
         <View style={styles.authContainer}>
-          <AuthButton
-            provider="apple"
-            onPress={handleAppleSignIn}
-            loading={isLoadingApple}
-            disabled={isLoadingGoogle}
-            style={styles.authButton}
-          />
+          {Platform.OS === 'ios' && (
+            <AuthButton
+              provider="apple"
+              onPress={handleAppleSignIn}
+              loading={appleLoading}
+              disabled={googleLoading}
+              style={styles.authButton}
+            />
+          )}
           <AuthButton
             provider="google"
             onPress={handleGoogleSignIn}
-            loading={isLoadingGoogle}
-            disabled={isLoadingApple}
+            loading={googleLoading}
+            disabled={appleLoading}
             style={styles.authButton}
           />
         </View>

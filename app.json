@@ -22,7 +22,21 @@
         "backgroundColor": "#FDFBF7"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.crochetly.app"
+      "package": "com.crochetly.app",
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [
+            {
+              "scheme": "fastshot",
+              "host": "auth",
+              "pathPrefix": "/callback"
+            }
+          ],
+          "category": ["BROWSABLE", "DEFAULT"]
+        }
+      ]
     },
     "web": {
       "bundler": "metro",
@@ -44,6 +58,12 @@
     "experiments": {
       "typedRoutes": true,
       "baseUrl": ""
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "a58c7871-e319-4515-98d0-ba8b67464275"
+      }
     }
   }
 }
