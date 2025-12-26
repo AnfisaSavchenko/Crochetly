@@ -47,29 +47,85 @@ export default function AuthScreen() {
 
   const handleGoogleSignIn = async () => {
     try {
+      // Log configuration for debugging
+      console.log('=== Google Sign-In Started ===');
+      console.log('Project ID:', process.env.EXPO_PUBLIC_PROJECT_ID);
+      console.log('Supabase URL:', process.env.EXPO_PUBLIC_SUPABASE_URL);
+      console.log('Auth Broker URL:', process.env.EXPO_PUBLIC_AUTH_BROKER_URL);
+
       await googleSignIn();
       // Note: Navigation will happen after auth callback in _layout.tsx
       // The auth callback will save profile data and mark onboarding complete
     } catch (error) {
       console.error('Google Sign In error:', error);
-      Alert.alert(
-        'Authentication Error',
-        'Failed to sign in with Google. Please try again.'
-      );
+
+      // Enhanced error messaging
+      let errorMessage = 'Failed to sign in with Google. Please try again.';
+      let errorTitle = 'Authentication Error';
+
+      if (error && typeof error === 'object' && 'message' in error) {
+        const errMsg = (error as Error).message.toLowerCase();
+
+        if (errMsg.includes('500') || errMsg.includes('internal server')) {
+          errorTitle = 'Configuration Error';
+          errorMessage =
+            'OAuth configuration issue detected. This usually means:\n\n' +
+            '1. Google OAuth is not enabled in your Supabase Dashboard\n' +
+            '2. Google Client ID/Secret is missing\n' +
+            '3. Project configuration mismatch\n\n' +
+            'Please check your Supabase Dashboard → Authentication → Providers → Google.';
+        } else if (errMsg.includes('cancel') || errMsg.includes('dismiss')) {
+          errorTitle = 'Sign-In Cancelled';
+          errorMessage = 'You cancelled the sign-in process.';
+        } else if (errMsg.includes('network')) {
+          errorTitle = 'Network Error';
+          errorMessage = 'Please check your internet connection and try again.';
+        }
+      }
+
+      Alert.alert(errorTitle, errorMessage);
     }
   };
 
   const handleAppleSignIn = async () => {
     try {
+      // Log configuration for debugging
+      console.log('=== Apple Sign-In Started ===');
+      console.log('Project ID:', process.env.EXPO_PUBLIC_PROJECT_ID);
+      console.log('Supabase URL:', process.env.EXPO_PUBLIC_SUPABASE_URL);
+      console.log('Auth Broker URL:', process.env.EXPO_PUBLIC_AUTH_BROKER_URL);
+
       await appleSignIn();
       // Note: Navigation will happen after auth callback in _layout.tsx
       // The auth callback will save profile data and mark onboarding complete
     } catch (error) {
       console.error('Apple Sign In error:', error);
-      Alert.alert(
-        'Authentication Error',
-        'Failed to sign in with Apple. Please try again.'
-      );
+
+      // Enhanced error messaging
+      let errorMessage = 'Failed to sign in with Apple. Please try again.';
+      let errorTitle = 'Authentication Error';
+
+      if (error && typeof error === 'object' && 'message' in error) {
+        const errMsg = (error as Error).message.toLowerCase();
+
+        if (errMsg.includes('500') || errMsg.includes('internal server')) {
+          errorTitle = 'Configuration Error';
+          errorMessage =
+            'OAuth configuration issue detected. This usually means:\n\n' +
+            '1. Apple OAuth is not enabled in your Supabase Dashboard\n' +
+            '2. Apple Service ID/Team ID/Key ID is missing\n' +
+            '3. Project configuration mismatch\n\n' +
+            'Please check your Supabase Dashboard → Authentication → Providers → Apple.';
+        } else if (errMsg.includes('cancel') || errMsg.includes('dismiss')) {
+          errorTitle = 'Sign-In Cancelled';
+          errorMessage = 'You cancelled the sign-in process.';
+        } else if (errMsg.includes('network')) {
+          errorTitle = 'Network Error';
+          errorMessage = 'Please check your internet connection and try again.';
+        }
+      }
+
+      Alert.alert(errorTitle, errorMessage);
     }
   };
 
