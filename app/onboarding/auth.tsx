@@ -64,8 +64,17 @@ export default function AuthScreen() {
       // Log configuration for debugging
       console.log('=== Google Sign-In Started ===');
       console.log('Project ID:', process.env.EXPO_PUBLIC_PROJECT_ID);
+      console.log('PROJECT_ID Length:', process.env.EXPO_PUBLIC_PROJECT_ID?.length);
       console.log('Supabase URL:', process.env.EXPO_PUBLIC_SUPABASE_URL);
       console.log('Auth Broker URL:', process.env.EXPO_PUBLIC_AUTH_BROKER_URL);
+
+      // Log the exact OAuth URL that will be opened
+      const projectId = process.env.EXPO_PUBLIC_PROJECT_ID || '';
+      const brokerUrl = process.env.EXPO_PUBLIC_AUTH_BROKER_URL || '';
+      const returnTo = 'fastshot://auth/callback';
+      const oauthUrl = `${brokerUrl}/v1/auth/google/start?tenant=${projectId}&return_to=${encodeURIComponent(returnTo)}&mode=browser`;
+      console.log('OAuth URL to be opened:', oauthUrl);
+      console.log('URL Length:', oauthUrl.length);
 
       await googleSignIn();
       // Note: Navigation will happen after auth callback in _layout.tsx
@@ -119,8 +128,17 @@ export default function AuthScreen() {
       // Log configuration for debugging
       console.log('=== Apple Sign-In Started ===');
       console.log('Project ID:', process.env.EXPO_PUBLIC_PROJECT_ID);
+      console.log('PROJECT_ID Length:', process.env.EXPO_PUBLIC_PROJECT_ID?.length);
       console.log('Supabase URL:', process.env.EXPO_PUBLIC_SUPABASE_URL);
       console.log('Auth Broker URL:', process.env.EXPO_PUBLIC_AUTH_BROKER_URL);
+
+      // Log the exact OAuth URL that will be opened
+      const projectId = process.env.EXPO_PUBLIC_PROJECT_ID || '';
+      const brokerUrl = process.env.EXPO_PUBLIC_AUTH_BROKER_URL || '';
+      const returnTo = 'fastshot://auth/callback';
+      const oauthUrl = `${brokerUrl}/v1/auth/apple/start?tenant=${projectId}&return_to=${encodeURIComponent(returnTo)}&mode=browser`;
+      console.log('OAuth URL to be opened:', oauthUrl);
+      console.log('URL Length:', oauthUrl.length);
 
       await appleSignIn();
       // Note: Navigation will happen after auth callback in _layout.tsx
