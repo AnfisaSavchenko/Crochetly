@@ -35,6 +35,8 @@ export default function RootLayout() {
   });
 
   // Handle OAuth callback from @fastshot/auth
+  // This hook listens for deep links (fastshot://auth/callback?ticket=xxx)
+  // and automatically exchanges the ticket for a Supabase session
   const { isProcessing } = useAuthCallback({
     supabaseClient: supabase,
     onSuccess: async ({ user, session }) => {
@@ -45,14 +47,24 @@ export default function RootLayout() {
 
       try {
         // Save user profile with quiz data and mark onboarding complete
+        // This writes to the user_profiles table in Supabase
         await AuthService.saveUserProfileAfterAuth(user.id);
         console.log('✅ User profile saved successfully');
         // Navigation to home will happen automatically via the redirect check in index.tsx
       } catch (error) {
         console.error('❌ Error saving user profile after auth:', error);
+
+        // If profile save fails, it's likely an RLS policy issue or table doesn't exist
+        const errorMsg = error instanceof Error ? error.message : 'Unknown error';
         Alert.alert(
           'Profile Save Error',
-          'Authentication succeeded but failed to save your profile. Please contact support.'
+          `Authentication succeeded but failed to save your profile.\n\n` +
+          `Error: ${errorMsg}\n\n` +
+          `This may indicate:\n` +
+          `• RLS policies are blocking the write\n` +
+          `• user_profiles table doesn't exist\n` +
+          `• Network connectivity issue\n\n` +
+          `Please check Supabase logs or contact support.`
         );
       }
     },
@@ -62,22 +74,32 @@ export default function RootLayout() {
       console.error('Error message:', error.message);
       console.error('Original error:', error.originalError);
 
-      // Enhanced error messaging
+      // Enhanced error messaging with specific troubleshooting steps
       let errorMessage = error.message || 'Failed to complete sign in';
       let errorTitle = 'Authentication Error';
 
       if (error.message?.toLowerCase().includes('500') ||
           error.message?.toLowerCase().includes('internal server')) {
-        errorTitle = 'OAuth Configuration Error';
+        errorTitle = 'OAuth Broker Error (500)';
         errorMessage =
-          'The authentication broker encountered an error. This typically means:\n\n' +
-          '• OAuth providers are not configured in Supabase Dashboard\n' +
-          '• Missing OAuth credentials (Client ID/Secret)\n' +
-          '• Project configuration mismatch\n\n' +
-          'Please configure OAuth providers in your Supabase Dashboard.';
+          'The authentication broker returned a 500 error. Common causes:\n\n' +
+          '1. OAuth providers not enabled in Supabase Dashboard\n' +
+          '   → Go to Authentication → Providers → Enable Google/Apple\n\n' +
+          '2. Missing OAuth credentials (Client ID/Secret)\n' +
+          '   → Add credentials in Supabase provider settings\n\n' +
+          '3. PROJECT_ID mismatch in .env file\n' +
+          '   → EXPO_PUBLIC_PROJECT_ID must match Supabase project ref\n\n' +
+          '4. Redirect URI not configured correctly\n' +
+          '   → Add https://oauth.fastshot.ai/v1/auth/callback to provider settings';
       } else if (error.message?.toLowerCase().includes('ticket')) {
-        errorTitle = 'Session Error';
-        errorMessage = 'Failed to exchange authentication ticket. Please try again.';
+        errorTitle = 'Session Exchange Error';
+        errorMessage =
+          'Failed to exchange authentication ticket for a session.\n\n' +
+          'This usually means:\n' +
+          '• The ticket expired (tickets are valid for 60 seconds)\n' +
+          '• Network connectivity issue\n' +
+          '• Auth broker is temporarily unavailable\n\n' +
+          'Please try signing in again.';
       }
 
       Alert.alert(errorTitle, errorMessage);

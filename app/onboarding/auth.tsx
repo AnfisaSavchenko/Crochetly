@@ -16,6 +16,7 @@ import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useGoogleSignIn, useAppleSignIn } from '@fastshot/auth';
 import { supabase } from '@/services/supabaseClient';
+import { ConfigValidator } from '@/services/configValidator';
 import { StrokedText } from '@/components';
 import { AuthButton } from './components';
 import { Colors, Spacing, FontSize, Fonts } from '@/constants/theme';
@@ -47,6 +48,19 @@ export default function AuthScreen() {
 
   const handleGoogleSignIn = async () => {
     try {
+      // Validate configuration before attempting OAuth
+      try {
+        ConfigValidator.validateForOAuth();
+      } catch (configError) {
+        console.error('Configuration validation failed:', configError);
+        Alert.alert(
+          'Configuration Error',
+          'OAuth is not properly configured. Please check the console for details.\n\n' +
+          (configError instanceof Error ? configError.message : 'Unknown error')
+        );
+        return;
+      }
+
       // Log configuration for debugging
       console.log('=== Google Sign-In Started ===');
       console.log('Project ID:', process.env.EXPO_PUBLIC_PROJECT_ID);
@@ -89,6 +103,19 @@ export default function AuthScreen() {
 
   const handleAppleSignIn = async () => {
     try {
+      // Validate configuration before attempting OAuth
+      try {
+        ConfigValidator.validateForOAuth();
+      } catch (configError) {
+        console.error('Configuration validation failed:', configError);
+        Alert.alert(
+          'Configuration Error',
+          'OAuth is not properly configured. Please check the console for details.\n\n' +
+          (configError instanceof Error ? configError.message : 'Unknown error')
+        );
+        return;
+      }
+
       // Log configuration for debugging
       console.log('=== Apple Sign-In Started ===');
       console.log('Project ID:', process.env.EXPO_PUBLIC_PROJECT_ID);

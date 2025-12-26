@@ -115,6 +115,7 @@ export class ConfigValidator {
 
   /**
    * Check if project ID matches Supabase project ref
+   * Returns error message if mismatch detected, null if OK
    */
   static checkProjectIdMismatch(): string | null {
     const projectId = process.env.EXPO_PUBLIC_PROJECT_ID;
@@ -127,15 +128,39 @@ export class ConfigValidator {
     // Check if they match
     if (projectId !== supabaseRef) {
       return (
-        `⚠️  PROJECT_ID MISMATCH DETECTED:\n` +
+        `⚠️  CRITICAL: PROJECT_ID MISMATCH DETECTED:\n` +
         `  EXPO_PUBLIC_PROJECT_ID: ${projectId}\n` +
         `  Supabase Project Ref: ${supabaseRef}\n\n` +
-        `This mismatch may cause 500 errors from the auth broker.\n` +
-        `The PROJECT_ID is sent as the "tenant" parameter to the broker,\n` +
-        `which must match the Supabase project reference.`
+        `❌ This WILL cause 500 errors from the auth broker!\n\n` +
+        `The PROJECT_ID is sent as the "tenant" parameter to oauth.fastshot.ai.\n` +
+        `The auth broker uses this to look up your Supabase OAuth configuration.\n` +
+        `If the tenant doesn't match your Supabase project reference, authentication will fail.\n\n` +
+        `FIX: Update .env to set:\n` +
+        `  EXPO_PUBLIC_PROJECT_ID=${supabaseRef}\n`
       );
     }
 
     return null;
+  }
+
+  /**
+   * Validate that the configuration is ready for OAuth
+   * Throws an error if critical issues are found
+   */
+  static validateForOAuth(): void {
+    const validation = this.validateEnvironment();
+
+    if (!validation.isValid) {
+      const errorMsg =
+        '❌ OAUTH CONFIGURATION ERROR:\n\n' +
+        validation.errors.join('\n') + '\n\n' +
+        'OAuth authentication cannot proceed with these errors.';
+      throw new Error(errorMsg);
+    }
+
+    const mismatch = this.checkProjectIdMismatch();
+    if (mismatch) {
+      throw new Error(mismatch);
+    }
   }
 }
