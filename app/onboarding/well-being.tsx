@@ -48,10 +48,11 @@ export default function WellBeingScreen() {
           styles.content,
           {
             paddingTop: insets.top + Spacing.xl,
-            paddingBottom: personalizationBarHeight + Spacing.xl,
+            paddingBottom: personalizationBarHeight + Spacing.xxl + 20,
           },
         ]}
         showsVerticalScrollIndicator={false}
+        bounces={false}
       >
         {/* Progress Indicator */}
         <View style={styles.progressContainer}>
@@ -89,7 +90,10 @@ export default function WellBeingScreen() {
           <Text style={styles.emoji}>🧠</Text>
         </View>
 
-        {/* CTA Button */}
+        {/* Flexible spacer */}
+        <View style={{ flex: 1, minHeight: Spacing.xl }} />
+
+        {/* CTA Button - Always visible */}
         <CTAButton
           title="Continue"
           onPress={handleContinue}
@@ -110,6 +114,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background,
   },
   content: {
+    flexGrow: 1,
     paddingHorizontal: Spacing.lg,
   },
   progressContainer: {
@@ -142,7 +147,7 @@ const styles = StyleSheet.create({
   emojiContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
-    marginBottom: Spacing.xxl,
+    marginBottom: Spacing.md,
     gap: Spacing.lg,
   },
   emoji: {

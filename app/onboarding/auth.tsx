@@ -181,10 +181,11 @@ export default function AuthScreen() {
           styles.content,
           {
             paddingTop: insets.top + Spacing.xxl,
-            paddingBottom: insets.bottom + Spacing.xl,
+            paddingBottom: insets.bottom + Spacing.xxl + 20,
           },
         ]}
         showsVerticalScrollIndicator={false}
+        bounces={false}
       >
         {/* Celebratory Title */}
         <View style={styles.titleContainer}>
@@ -195,13 +196,13 @@ export default function AuthScreen() {
 
         {/* Subtitle */}
         <Text style={styles.subtitle}>
-          Create an account to save patterns, track progress, and continue your personalized journey.
+          Create an account to save your patterns and progress.
         </Text>
 
-        {/* Spacer */}
-        <View style={styles.spacer} />
+        {/* Flexible spacer to push buttons down but keep them visible */}
+        <View style={{ flex: 1, minHeight: Spacing.xxl }} />
 
-        {/* Auth Buttons */}
+        {/* Auth Buttons - Always visible and prominent */}
         <View style={styles.authContainer}>
           {Platform.OS === 'ios' && (
             <AuthButton
@@ -236,12 +237,12 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background,
   },
   content: {
+    flexGrow: 1,
     paddingHorizontal: Spacing.lg,
-    flex: 1,
-    justifyContent: 'center',
+    justifyContent: 'space-between',
   },
   titleContainer: {
-    marginBottom: Spacing.lg,
+    marginBottom: Spacing.md,
     alignItems: 'center',
   },
   subtitle: {
@@ -250,13 +251,10 @@ const styles = StyleSheet.create({
     color: Colors.textSecondary,
     textAlign: 'center',
     lineHeight: 24,
-    paddingHorizontal: Spacing.md,
-  },
-  spacer: {
-    height: Spacing.xxl,
+    paddingHorizontal: Spacing.sm,
   },
   authContainer: {
-    marginBottom: Spacing.xl,
+    marginBottom: Spacing.md,
   },
   authButton: {
     marginBottom: Spacing.md,

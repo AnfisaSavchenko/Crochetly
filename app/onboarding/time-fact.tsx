@@ -39,10 +39,11 @@ export default function TimeFactScreen() {
           styles.content,
           {
             paddingTop: insets.top + Spacing.xl,
-            paddingBottom: personalizationBarHeight + Spacing.xl,
+            paddingBottom: personalizationBarHeight + Spacing.xxl + 20,
           },
         ]}
         showsVerticalScrollIndicator={false}
+        bounces={false}
       >
         {/* Progress Indicator */}
         <View style={styles.progressContainer}>
@@ -74,7 +75,10 @@ export default function TimeFactScreen() {
           A handmade sweater typically takes 20-40 hours to complete. That&apos;s dedication! 🧶
         </Text>
 
-        {/* CTA Button */}
+        {/* Flexible spacer */}
+        <View style={{ flex: 1, minHeight: Spacing.xl }} />
+
+        {/* CTA Button - Always visible */}
         <CTAButton
           title="Continue"
           onPress={handleContinue}
@@ -94,6 +98,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background,
   },
   content: {
+    flexGrow: 1,
     paddingHorizontal: Spacing.lg,
   },
   progressContainer: {
@@ -119,7 +124,7 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.light,
     color: Colors.textSecondary,
     textAlign: 'center',
-    marginBottom: Spacing.xxl,
+    marginBottom: Spacing.md,
     lineHeight: 24,
   },
   ctaButton: {

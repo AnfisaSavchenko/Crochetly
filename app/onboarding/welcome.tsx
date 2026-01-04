@@ -38,10 +38,11 @@ export default function WelcomeScreen() {
           styles.content,
           {
             paddingTop: insets.top + Spacing.xl,
-            paddingBottom: personalizationBarHeight + Spacing.xl,
+            paddingBottom: personalizationBarHeight + Spacing.xxl + 20,
           },
         ]}
         showsVerticalScrollIndicator={false}
+        bounces={false}
       >
         {/* Progress Indicator */}
         <View style={styles.progressContainer}>
@@ -70,10 +71,10 @@ export default function WelcomeScreen() {
           Turn any photo into a crochet pattern made just for you.
         </Text>
 
-        {/* Spacer to push button up */}
-        <View style={styles.spacer} />
+        {/* Flexible spacer */}
+        <View style={{ flex: 1, minHeight: Spacing.xl }} />
 
-        {/* CTA Button */}
+        {/* CTA Button - Always visible */}
         <CTAButton
           title="Get Started"
           onPress={handleGetStarted}
@@ -93,6 +94,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background,
   },
   content: {
+    flexGrow: 1,
     paddingHorizontal: Spacing.lg,
   },
   progressContainer: {
@@ -133,11 +135,7 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.md,
     lineHeight: 24,
   },
-  spacer: {
-    height: Spacing.md,
-  },
   ctaButton: {
     width: '100%',
-    marginBottom: Spacing.lg,
   },
 });

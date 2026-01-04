@@ -79,10 +79,11 @@ export default function CreationIntentScreen() {
           styles.content,
           {
             paddingTop: insets.top + Spacing.xl,
-            paddingBottom: personalizationBarHeight + Spacing.xl,
+            paddingBottom: personalizationBarHeight + Spacing.xxl + 20,
           },
         ]}
         showsVerticalScrollIndicator={false}
+        bounces={false}
       >
         {/* Progress Indicator */}
         <View style={styles.progressContainer}>
@@ -115,7 +116,10 @@ export default function CreationIntentScreen() {
           ))}
         </View>
 
-        {/* CTA Button */}
+        {/* Flexible spacer */}
+        <View style={{ flex: 1, minHeight: Spacing.md }} />
+
+        {/* CTA Button - Always visible */}
         <CTAButton
           title="Create My Crochet Plan"
           onPress={handleContinue}
@@ -137,6 +141,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background,
   },
   content: {
+    flexGrow: 1,
     paddingHorizontal: Spacing.lg,
   },
   progressContainer: {
@@ -151,13 +156,13 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.light,
     color: Colors.textSecondary,
     textAlign: 'center',
-    marginBottom: Spacing.xl,
+    marginBottom: Spacing.lg,
   },
   grid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     marginHorizontal: -Spacing.xs,
-    marginBottom: Spacing.xl,
+    marginBottom: Spacing.md,
   },
   gridItem: {
     width: '50%',
