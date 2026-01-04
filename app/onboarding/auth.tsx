@@ -17,6 +17,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useGoogleSignIn, useAppleSignIn } from '@fastshot/auth';
 import { supabase } from '@/services/supabaseClient';
 import { ConfigValidator } from '@/services/configValidator';
+import { AuthDiagnosticsService } from '@/services/authDiagnostics';
 import { StrokedText } from '@/components';
 import { AuthButton } from './components';
 import { Colors, Spacing, FontSize, Fonts } from '@/constants/theme';
@@ -48,33 +49,24 @@ export default function AuthScreen() {
 
   const handleGoogleSignIn = async () => {
     try {
+      // Run comprehensive diagnostics
+      console.log('\n🚀 INITIATING GOOGLE SIGN-IN');
+      AuthDiagnosticsService.logDiagnostics('google');
+
       // Validate configuration before attempting OAuth
-      try {
-        ConfigValidator.validateForOAuth();
-      } catch (configError) {
-        console.error('Configuration validation failed:', configError);
+      const validationIssues = AuthDiagnosticsService.validateConfiguration();
+      if (validationIssues.length > 0) {
+        console.error('❌ Configuration validation failed:');
+        validationIssues.forEach(issue => console.error(`  - ${issue}`));
         Alert.alert(
           'Configuration Error',
-          'OAuth is not properly configured. Please check the console for details.\n\n' +
-          (configError instanceof Error ? configError.message : 'Unknown error')
+          'OAuth configuration has issues:\n\n' + validationIssues.join('\n')
         );
         return;
       }
 
-      // Log configuration for debugging
-      console.log('=== Google Sign-In Started ===');
-      console.log('Project ID:', process.env.EXPO_PUBLIC_PROJECT_ID);
-      console.log('PROJECT_ID Length:', process.env.EXPO_PUBLIC_PROJECT_ID?.length);
-      console.log('Supabase URL:', process.env.EXPO_PUBLIC_SUPABASE_URL);
-      console.log('Auth Broker URL:', process.env.EXPO_PUBLIC_AUTH_BROKER_URL);
-
-      // Log the exact OAuth URL that will be opened
-      const projectId = process.env.EXPO_PUBLIC_PROJECT_ID || '';
-      const brokerUrl = process.env.EXPO_PUBLIC_AUTH_BROKER_URL || '';
-      const returnTo = 'fastshot://auth/callback';
-      const oauthUrl = `${brokerUrl}/v1/auth/google/start?tenant=${projectId}&return_to=${encodeURIComponent(returnTo)}&mode=browser`;
-      console.log('OAuth URL to be opened:', oauthUrl);
-      console.log('URL Length:', oauthUrl.length);
+      console.log('✅ Configuration validation passed');
+      console.log('🌐 Opening OAuth browser...\n');
 
       await googleSignIn();
       // Note: Navigation will happen after auth callback in _layout.tsx
@@ -112,33 +104,24 @@ export default function AuthScreen() {
 
   const handleAppleSignIn = async () => {
     try {
+      // Run comprehensive diagnostics
+      console.log('\n🚀 INITIATING APPLE SIGN-IN');
+      AuthDiagnosticsService.logDiagnostics('apple');
+
       // Validate configuration before attempting OAuth
-      try {
-        ConfigValidator.validateForOAuth();
-      } catch (configError) {
-        console.error('Configuration validation failed:', configError);
+      const validationIssues = AuthDiagnosticsService.validateConfiguration();
+      if (validationIssues.length > 0) {
+        console.error('❌ Configuration validation failed:');
+        validationIssues.forEach(issue => console.error(`  - ${issue}`));
         Alert.alert(
           'Configuration Error',
-          'OAuth is not properly configured. Please check the console for details.\n\n' +
-          (configError instanceof Error ? configError.message : 'Unknown error')
+          'OAuth configuration has issues:\n\n' + validationIssues.join('\n')
         );
         return;
       }
 
-      // Log configuration for debugging
-      console.log('=== Apple Sign-In Started ===');
-      console.log('Project ID:', process.env.EXPO_PUBLIC_PROJECT_ID);
-      console.log('PROJECT_ID Length:', process.env.EXPO_PUBLIC_PROJECT_ID?.length);
-      console.log('Supabase URL:', process.env.EXPO_PUBLIC_SUPABASE_URL);
-      console.log('Auth Broker URL:', process.env.EXPO_PUBLIC_AUTH_BROKER_URL);
-
-      // Log the exact OAuth URL that will be opened
-      const projectId = process.env.EXPO_PUBLIC_PROJECT_ID || '';
-      const brokerUrl = process.env.EXPO_PUBLIC_AUTH_BROKER_URL || '';
-      const returnTo = 'fastshot://auth/callback';
-      const oauthUrl = `${brokerUrl}/v1/auth/apple/start?tenant=${projectId}&return_to=${encodeURIComponent(returnTo)}&mode=browser`;
-      console.log('OAuth URL to be opened:', oauthUrl);
-      console.log('URL Length:', oauthUrl.length);
+      console.log('✅ Configuration validation passed');
+      console.log('🌐 Opening OAuth browser...\n');
 
       await appleSignIn();
       // Note: Navigation will happen after auth callback in _layout.tsx
