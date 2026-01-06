@@ -1,6 +1,6 @@
 /**
  * Onboarding Screen 6: Authorization Gate
- * Final screen with Apple/Google sign-in options using @fastshot/auth
+ * Final screen with Apple/Google sign-in options using native Supabase OAuth
  */
 
 import React, { useEffect } from 'react';
@@ -14,26 +14,20 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useGoogleSignIn, useAppleSignIn } from '@fastshot/auth';
+import { makeRedirectUri } from 'expo-auth-session';
+import * as WebBrowser from 'expo-web-browser';
 import { supabase } from '@/services/supabaseClient';
-import { ConfigValidator } from '@/services/configValidator';
-import { AuthDiagnosticsService } from '@/services/authDiagnostics';
 import { StrokedText } from '@/components';
 import { AuthButton } from './components';
 import { Colors, Spacing, FontSize, Fonts } from '@/constants/theme';
 
+// Warm up the browser for faster OAuth
+WebBrowser.maybeCompleteAuthSession();
+
 export default function AuthScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-
-  // @fastshot/auth hooks for OAuth
-  const { signIn: googleSignIn, isLoading: googleLoading } = useGoogleSignIn({
-    supabaseClient: supabase,
-  });
-
-  const { signIn: appleSignIn, isLoading: appleLoading } = useAppleSignIn({
-    supabaseClient: supabase,
-  });
+  const [isLoading, setIsLoading] = React.useState<'google' | 'apple' | null>(null);
 
   // Check if user is already authenticated
   useEffect(() => {
@@ -47,32 +41,73 @@ export default function AuthScreen() {
     checkAuth();
   }, [router]);
 
+  // Listen for auth state changes
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('Auth state changed:', event, session?.user?.id);
+
+      if (event === 'SIGNED_IN' && session) {
+        // Auth successful, navigate to home
+        setIsLoading(null);
+        router.replace('/');
+      } else if (event === 'SIGNED_OUT') {
+        setIsLoading(null);
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [router]);
+
   const handleGoogleSignIn = async () => {
     try {
-      // Run comprehensive diagnostics
-      console.log('\n🚀 INITIATING GOOGLE SIGN-IN');
-      AuthDiagnosticsService.logDiagnostics('google');
+      setIsLoading('google');
+      console.log('🚀 INITIATING GOOGLE SIGN-IN');
 
-      // Validate configuration before attempting OAuth
-      const validationIssues = AuthDiagnosticsService.validateConfiguration();
-      if (validationIssues.length > 0) {
-        console.error('❌ Configuration validation failed:');
-        validationIssues.forEach(issue => console.error(`  - ${issue}`));
-        Alert.alert(
-          'Configuration Error',
-          'OAuth configuration has issues:\n\n' + validationIssues.join('\n')
-        );
-        return;
+      // Get the redirect URI for OAuth
+      const redirectTo = makeRedirectUri({
+        scheme: 'com.crochetly.app',
+        path: 'auth/callback',
+      });
+
+      console.log('📍 Redirect URI:', redirectTo);
+
+      // Sign in with Google using Supabase
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo,
+          skipBrowserRedirect: false,
+        },
+      });
+
+      if (error) throw error;
+
+      if (!data?.url) {
+        throw new Error('No authorization URL returned');
       }
 
-      console.log('✅ Configuration validation passed');
-      console.log('🌐 Opening OAuth browser...\n');
+      console.log('🌐 Opening OAuth browser...');
 
-      await googleSignIn();
-      // Note: Navigation will happen after auth callback in _layout.tsx
-      // The auth callback will save profile data and mark onboarding complete
+      // Open the OAuth URL in a browser
+      const result = await WebBrowser.openAuthSessionAsync(
+        data.url,
+        redirectTo
+      );
+
+      console.log('📱 Browser result:', result.type);
+
+      if (result.type === 'cancel') {
+        setIsLoading(null);
+        Alert.alert('Sign-In Cancelled', 'You cancelled the sign-in process.');
+      } else if (result.type === 'success') {
+        // The auth state change listener will handle navigation
+        console.log('✅ OAuth success, waiting for session...');
+      }
     } catch (error) {
       console.error('Google Sign In error:', error);
+      setIsLoading(null);
 
       // Enhanced error messaging
       let errorMessage = 'Failed to sign in with Google. Please try again.';
@@ -81,17 +116,12 @@ export default function AuthScreen() {
       if (error && typeof error === 'object' && 'message' in error) {
         const errMsg = (error as Error).message.toLowerCase();
 
-        if (errMsg.includes('500') || errMsg.includes('internal server')) {
+        if (errMsg.includes('not enabled') || errMsg.includes('provider')) {
           errorTitle = 'Configuration Error';
           errorMessage =
-            'OAuth configuration issue detected. This usually means:\n\n' +
-            '1. Google OAuth is not enabled in your Supabase Dashboard\n' +
-            '2. Google Client ID/Secret is missing\n' +
-            '3. Project configuration mismatch\n\n' +
-            'Please check your Supabase Dashboard → Authentication → Providers → Google.';
-        } else if (errMsg.includes('cancel') || errMsg.includes('dismiss')) {
-          errorTitle = 'Sign-In Cancelled';
-          errorMessage = 'You cancelled the sign-in process.';
+            'Google OAuth is not enabled for this app.\n\n' +
+            'Please enable Google OAuth in your Supabase Dashboard:\n' +
+            'Authentication → Providers → Google';
         } else if (errMsg.includes('network')) {
           errorTitle = 'Network Error';
           errorMessage = 'Please check your internet connection and try again.';
@@ -104,30 +134,52 @@ export default function AuthScreen() {
 
   const handleAppleSignIn = async () => {
     try {
-      // Run comprehensive diagnostics
-      console.log('\n🚀 INITIATING APPLE SIGN-IN');
-      AuthDiagnosticsService.logDiagnostics('apple');
+      setIsLoading('apple');
+      console.log('🚀 INITIATING APPLE SIGN-IN');
 
-      // Validate configuration before attempting OAuth
-      const validationIssues = AuthDiagnosticsService.validateConfiguration();
-      if (validationIssues.length > 0) {
-        console.error('❌ Configuration validation failed:');
-        validationIssues.forEach(issue => console.error(`  - ${issue}`));
-        Alert.alert(
-          'Configuration Error',
-          'OAuth configuration has issues:\n\n' + validationIssues.join('\n')
-        );
-        return;
+      // Get the redirect URI for OAuth
+      const redirectTo = makeRedirectUri({
+        scheme: 'com.crochetly.app',
+        path: 'auth/callback',
+      });
+
+      console.log('📍 Redirect URI:', redirectTo);
+
+      // Sign in with Apple using Supabase
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'apple',
+        options: {
+          redirectTo,
+          skipBrowserRedirect: false,
+        },
+      });
+
+      if (error) throw error;
+
+      if (!data?.url) {
+        throw new Error('No authorization URL returned');
       }
 
-      console.log('✅ Configuration validation passed');
-      console.log('🌐 Opening OAuth browser...\n');
+      console.log('🌐 Opening OAuth browser...');
 
-      await appleSignIn();
-      // Note: Navigation will happen after auth callback in _layout.tsx
-      // The auth callback will save profile data and mark onboarding complete
+      // Open the OAuth URL in a browser
+      const result = await WebBrowser.openAuthSessionAsync(
+        data.url,
+        redirectTo
+      );
+
+      console.log('📱 Browser result:', result.type);
+
+      if (result.type === 'cancel') {
+        setIsLoading(null);
+        Alert.alert('Sign-In Cancelled', 'You cancelled the sign-in process.');
+      } else if (result.type === 'success') {
+        // The auth state change listener will handle navigation
+        console.log('✅ OAuth success, waiting for session...');
+      }
     } catch (error) {
       console.error('Apple Sign In error:', error);
+      setIsLoading(null);
 
       // Enhanced error messaging
       let errorMessage = 'Failed to sign in with Apple. Please try again.';
@@ -136,17 +188,12 @@ export default function AuthScreen() {
       if (error && typeof error === 'object' && 'message' in error) {
         const errMsg = (error as Error).message.toLowerCase();
 
-        if (errMsg.includes('500') || errMsg.includes('internal server')) {
+        if (errMsg.includes('not enabled') || errMsg.includes('provider')) {
           errorTitle = 'Configuration Error';
           errorMessage =
-            'OAuth configuration issue detected. This usually means:\n\n' +
-            '1. Apple OAuth is not enabled in your Supabase Dashboard\n' +
-            '2. Apple Service ID/Team ID/Key ID is missing\n' +
-            '3. Project configuration mismatch\n\n' +
-            'Please check your Supabase Dashboard → Authentication → Providers → Apple.';
-        } else if (errMsg.includes('cancel') || errMsg.includes('dismiss')) {
-          errorTitle = 'Sign-In Cancelled';
-          errorMessage = 'You cancelled the sign-in process.';
+            'Apple OAuth is not enabled for this app.\n\n' +
+            'Please enable Apple OAuth in your Supabase Dashboard:\n' +
+            'Authentication → Providers → Apple';
         } else if (errMsg.includes('network')) {
           errorTitle = 'Network Error';
           errorMessage = 'Please check your internet connection and try again.';
@@ -191,16 +238,16 @@ export default function AuthScreen() {
             <AuthButton
               provider="apple"
               onPress={handleAppleSignIn}
-              loading={appleLoading}
-              disabled={googleLoading}
+              loading={isLoading === 'apple'}
+              disabled={isLoading === 'google'}
               style={styles.authButton}
             />
           )}
           <AuthButton
             provider="google"
             onPress={handleGoogleSignIn}
-            loading={googleLoading}
-            disabled={appleLoading}
+            loading={isLoading === 'google'}
+            disabled={isLoading === 'apple'}
             style={styles.authButton}
           />
         </View>
