@@ -9,8 +9,14 @@ const ONBOARDING_KEY = '@crochetly:onboarding_completed';
 const QUIZ_DATA_KEY = '@crochetly:quiz_data';
 
 export interface QuizData {
+  // Old format (for compatibility)
   skillLevel?: 'beginner' | 'intermediate' | 'advanced';
   intent?: string; // Comma-separated list of selected intents
+  // New format
+  level?: string; // 'brand_new' | 'know_some' | 'confident' | 'personality'
+  skills?: string; // 'videos' | 'photos' | 'written' | 'mix'
+  target?: string; // 'photos' | 'cute_guys' | 'cozy' | 'home' | 'gifts'
+  motivation?: string; // 'relax' | 'learn' | 'gifts' | 'sell'
 }
 
 export class OnboardingStorage {

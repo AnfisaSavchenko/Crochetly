@@ -12,15 +12,26 @@ export class AuthService {
    */
   static async saveUserProfile(userId: string, quizData: QuizData): Promise<void> {
     try {
+      // Combine old and new quiz data formats
+      const profileData = {
+        id: userId,
+        // Old format (for backward compatibility)
+        skill_level: quizData.skillLevel || quizData.level || '',
+        creation_intent: quizData.intent || '',
+        // New format - store as JSON string
+        quiz_responses: JSON.stringify({
+          level: quizData.level,
+          skills: quizData.skills,
+          target: quizData.target,
+          motivation: quizData.motivation,
+        }),
+        onboarding_completed: true,
+        updated_at: new Date().toISOString(),
+      };
+
       const { error } = await supabase
         .from('user_profiles')
-        .upsert({
-          id: userId,
-          skill_level: quizData.skillLevel,
-          creation_intent: quizData.intent,
-          onboarding_completed: true,
-          updated_at: new Date().toISOString(),
-        });
+        .upsert(profileData);
 
       if (error) {
         console.error('Error saving user profile:', error);

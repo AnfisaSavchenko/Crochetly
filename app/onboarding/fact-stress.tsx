@@ -1,0 +1,113 @@
+/**
+ * Onboarding Screen 1: Did You Know? - Stress Reduction
+ * Displays cute crochet lotus with stress reduction fact
+ */
+
+import React from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  Image,
+} from 'react-native';
+import { useRouter } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { StrokedText } from '@/components';
+import { CTAButton } from './components';
+import { Colors, Spacing, FontSize, Fonts, BorderRadius } from '@/constants/theme';
+
+export default function FactStressScreen() {
+  const router = useRouter();
+  const insets = useSafeAreaInsets();
+
+  const handleContinue = () => {
+    router.push('/onboarding/fact-teapot');
+  };
+
+  return (
+    <View style={styles.container}>
+      <ScrollView
+        contentContainerStyle={[
+          styles.content,
+          {
+            paddingTop: insets.top + Spacing.xxl,
+            paddingBottom: insets.bottom + Spacing.xxl + 80,
+          },
+        ]}
+        showsVerticalScrollIndicator={false}
+        bounces={false}
+      >
+        {/* Title */}
+        <View style={styles.titleContainer}>
+          <StrokedText fontSize={42} lineHeight={50}>
+            Did you know?
+          </StrokedText>
+        </View>
+
+        {/* Hero Image - Lotus */}
+        <View style={styles.imageContainer}>
+          <View style={styles.imagePlaceholder}>
+            <Text style={styles.emojiPlaceholder}>🪷</Text>
+          </View>
+        </View>
+
+        {/* Fact Text */}
+        <Text style={styles.factText}>
+          Repetitive, rhythmic activities{'\n'}
+          like crochet can help lower{'\n'}
+          stress levels by up to 30%
+        </Text>
+
+        {/* Flexible spacer */}
+        <View style={{ flex: 1, minHeight: Spacing.xl }} />
+
+        {/* Continue Button */}
+        <CTAButton
+          title="Continue"
+          onPress={handleContinue}
+          style={styles.button}
+        />
+      </ScrollView>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: Colors.background,
+  },
+  content: {
+    flexGrow: 1,
+    paddingHorizontal: Spacing.lg,
+  },
+  titleContainer: {
+    marginBottom: Spacing.xxl,
+    alignItems: 'center',
+  },
+  imageContainer: {
+    marginBottom: Spacing.xxl,
+    alignItems: 'center',
+  },
+  imagePlaceholder: {
+    width: 280,
+    height: 280,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  emojiPlaceholder: {
+    fontSize: 200,
+  },
+  factText: {
+    fontSize: FontSize.lg,
+    fontFamily: Fonts.light,
+    color: Colors.text,
+    textAlign: 'center',
+    lineHeight: 28,
+    marginBottom: Spacing.xl,
+  },
+  button: {
+    width: '100%',
+  },
+});

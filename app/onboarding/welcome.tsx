@@ -25,7 +25,7 @@ export default function WelcomeScreen() {
   const insets = useSafeAreaInsets();
 
   const handleGetStarted = () => {
-    router.push('/onboarding/time-fact');
+    router.push('/onboarding/fact-stress');
   };
 
   // Calculate personalization bar height
