@@ -9,6 +9,7 @@ import {
   Text,
   StyleSheet,
   ScrollView,
+  Image,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -46,9 +47,11 @@ export default function FactTeapotScreen() {
 
         {/* Hero Image - Teapot */}
         <View style={styles.imageContainer}>
-          <View style={styles.imagePlaceholder}>
-            <Text style={styles.emojiPlaceholder}>🫖</Text>
-          </View>
+          <Image
+            source={require('@/assets/images/didyuknow2.png')}
+            style={styles.heroImage}
+            resizeMode="contain"
+          />
         </View>
 
         {/* Fact Text */}
@@ -89,14 +92,9 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.xxl,
     alignItems: 'center',
   },
-  imagePlaceholder: {
+  heroImage: {
     width: 280,
     height: 280,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  emojiPlaceholder: {
-    fontSize: 200,
   },
   factText: {
     fontSize: FontSize.lg,

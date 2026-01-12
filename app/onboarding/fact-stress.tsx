@@ -15,7 +15,7 @@ import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StrokedText } from '@/components';
 import { CTAButton } from './components';
-import { Colors, Spacing, FontSize, Fonts, BorderRadius } from '@/constants/theme';
+import { Colors, Spacing, FontSize, Fonts } from '@/constants/theme';
 
 export default function FactStressScreen() {
   const router = useRouter();
@@ -47,16 +47,18 @@ export default function FactStressScreen() {
 
         {/* Hero Image - Lotus */}
         <View style={styles.imageContainer}>
-          <View style={styles.imagePlaceholder}>
-            <Text style={styles.emojiPlaceholder}>🪷</Text>
-          </View>
+          <Image
+            source={require('@/assets/images/lowerstresslevel.png')}
+            style={styles.heroImage}
+            resizeMode="contain"
+          />
         </View>
 
         {/* Fact Text */}
         <Text style={styles.factText}>
-          Repetitive, rhythmic activities{'\n'}
-          like crochet can help lower{'\n'}
-          stress levels by up to 30%
+          Crochet helps your nervous{'\n'}
+          system slow down and{'\n'}
+          feel more grounded.
         </Text>
 
         {/* Flexible spacer */}
@@ -90,14 +92,9 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.xxl,
     alignItems: 'center',
   },
-  imagePlaceholder: {
+  heroImage: {
     width: 280,
     height: 280,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  emojiPlaceholder: {
-    fontSize: 200,
   },
   factText: {
     fontSize: FontSize.lg,

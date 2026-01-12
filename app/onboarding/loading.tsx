@@ -9,6 +9,7 @@ import {
   Text,
   StyleSheet,
   Animated,
+  Image,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -66,7 +67,7 @@ export default function LoadingScreen() {
       {/* Title */}
       <View style={styles.titleContainer}>
         <StrokedText fontSize={36} lineHeight={44}>
-          We're preparing{'\n'}your crochet{'\n'}journey.{'\n'}Just a moment.
+          We&apos;re preparing{'\n'}your crochet{'\n'}journey.{'\n'}Just a moment.
         </StrokedText>
       </View>
 
@@ -80,9 +81,13 @@ export default function LoadingScreen() {
           },
         ]}
       >
-        {/* Cloud Placeholder */}
-        <View style={styles.cloudContainer}>
-          <Text style={styles.cloudEmoji}>☁️</Text>
+        {/* Clock Image */}
+        <View style={styles.imageWrapper}>
+          <Image
+            source={require('@/assets/images/clock.png')}
+            style={styles.clockImage}
+            resizeMode="contain"
+          />
         </View>
 
         {/* Progress Circle */}
@@ -116,11 +121,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: Spacing.xxl * 2,
   },
-  cloudContainer: {
+  imageWrapper: {
     marginBottom: Spacing.xl,
   },
-  cloudEmoji: {
-    fontSize: 200,
+  clockImage: {
+    width: 280,
+    height: 280,
   },
   progressContainer: {
     position: 'absolute',
