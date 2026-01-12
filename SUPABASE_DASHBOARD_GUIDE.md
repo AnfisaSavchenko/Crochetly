@@ -6,7 +6,7 @@ This guide shows you **exactly** what to enter in the Supabase Dashboard once yo
 
 ## 🟢 Step 1: Access Supabase Auth Providers
 
-1. Go to: https://supabase.com/dashboard/project/wijsfrgbxmpzltobxxnq
+1. Go to: https://supabase.com/dashboard/project/fldyoyeimoyoiygesjpf
 2. In the left sidebar, click **Authentication**
 3. Click on **Providers** (sub-menu under Authentication)
 4. You'll see a list of auth providers
