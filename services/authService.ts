@@ -12,6 +12,8 @@ export class AuthService {
    */
   static async saveUserProfile(userId: string, quizData: QuizData): Promise<void> {
     try {
+      console.log('      Preparing profile data for user:', userId);
+
       // Combine old and new quiz data formats
       const profileData = {
         id: userId,
@@ -29,16 +31,34 @@ export class AuthService {
         updated_at: new Date().toISOString(),
       };
 
-      const { error } = await supabase
+      console.log('      Profile data prepared:', {
+        id: profileData.id,
+        skill_level: profileData.skill_level,
+        creation_intent: profileData.creation_intent,
+        onboarding_completed: profileData.onboarding_completed,
+      });
+
+      const { data, error } = await supabase
         .from('user_profiles')
-        .upsert(profileData);
+        .upsert(profileData)
+        .select();
 
       if (error) {
-        console.error('Error saving user profile:', error);
+        console.error('      ❌ Supabase error:', error.message);
+        console.error('      Error details:', JSON.stringify(error, null, 2));
         throw error;
       }
+
+      console.log('      ✅ Profile upserted successfully');
+      if (data && data.length > 0) {
+        console.log('      Profile record:', data[0]);
+      }
     } catch (error) {
-      console.error('Failed to save user profile:', error);
+      console.error('      ❌ Failed to save user profile:', error);
+      if (error instanceof Error) {
+        console.error('      Error type:', error.constructor.name);
+        console.error('      Error message:', error.message);
+      }
       throw error;
     }
   }
@@ -49,18 +69,33 @@ export class AuthService {
    */
   static async saveUserProfileAfterAuth(userId: string): Promise<void> {
     try {
+      console.log('📝 Starting profile save process...');
+
       // Get quiz data from storage
       const quizData = await OnboardingStorage.getQuizData();
+      console.log('   Quiz data retrieved:', Object.keys(quizData).length > 0 ? '✅' : '⚠️ Empty');
 
       // Save profile with quiz data
+      console.log('   Saving to Supabase...');
       await this.saveUserProfile(userId, quizData);
+      console.log('   ✅ Profile saved to database');
 
       // Mark onboarding as complete
+      console.log('   Marking onboarding complete...');
       await OnboardingStorage.setOnboardingCompleted();
+      console.log('   ✅ Onboarding flag set');
 
-      console.log('User profile saved successfully after authentication');
+      // Verify the flag was set
+      const isCompleted = await OnboardingStorage.isOnboardingCompleted();
+      console.log('   Verification:', isCompleted ? '✅ Confirmed' : '❌ Failed to set');
+
+      console.log('✨ User profile saved successfully after authentication');
     } catch (error) {
-      console.error('Error saving user profile after auth:', error);
+      console.error('❌ Error saving user profile after auth:', error);
+      if (error instanceof Error) {
+        console.error('   Error message:', error.message);
+        console.error('   Error stack:', error.stack);
+      }
       throw error;
     }
   }

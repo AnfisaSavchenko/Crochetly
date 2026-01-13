@@ -31,20 +31,27 @@ export default function RootLayout() {
   const { isProcessing: isAuthProcessing } = useAuthCallback({
     supabaseClient: supabase,
     onSuccess: async ({ user }) => {
-      console.log('✅ OAuth sign-in successful');
+      console.log('✅ OAuth sign-in successful from useAuthCallback');
       console.log('   User ID:', user.id);
       console.log('   Email:', user.email);
 
       try {
         // Save user profile with quiz data
+        console.log('💾 Saving user profile...');
         await AuthService.saveUserProfileAfterAuth(user.id);
         console.log('✅ User profile saved successfully');
+
+        // Small delay to ensure state updates propagate
+        await new Promise(resolve => setTimeout(resolve, 300));
+
+        // Navigate to home
+        console.log('🏠 Navigating to home screen');
+        router.replace('/');
       } catch (error) {
         console.error('❌ Error saving user profile:', error);
+        // Still navigate even if profile save fails
+        router.replace('/');
       }
-
-      // Navigate to home
-      router.replace('/');
     },
     onError: (error) => {
       console.error('❌ OAuth callback error:', error);
@@ -65,22 +72,16 @@ export default function RootLayout() {
     preloadImages();
   }, []);
 
-  // Listen for auth state changes and save user profile
+  // Listen for auth state changes
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (event === 'SIGNED_IN' && session?.user) {
-        console.log('=== User Signed In ===');
-        console.log('User ID:', session.user.id);
-        console.log('User Email:', session.user.email);
-
-        try {
-          // Save user profile with quiz data
-          await AuthService.saveUserProfileAfterAuth(session.user.id);
-          console.log('✅ User profile saved successfully');
-        } catch (error) {
-          console.error('❌ Error saving user profile:', error);
-        }
+      console.log(`🔔 Auth state change: ${event}`);
+      if (session?.user) {
+        console.log('   User ID:', session.user.id);
+        console.log('   Email:', session.user.email);
       }
+      // Profile saving is handled by useAuthCallback onSuccess
+      // This listener is just for logging and monitoring
     });
 
     return () => {

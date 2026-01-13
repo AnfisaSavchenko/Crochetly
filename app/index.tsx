@@ -21,6 +21,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { FAB, EmptyState, ProjectCard, StrokedText } from '@/components';
 import { ProjectStorage } from '@/services/storage';
 import { OnboardingStorage } from '@/services/onboardingStorage';
+import { supabase } from '@/services/supabaseClient';
 import { ProjectSummary } from '@/types/project';
 import { Colors, Spacing, FontSize, Fonts, NeoBrutalist } from '@/constants/theme';
 
@@ -38,14 +39,46 @@ export default function HomeScreen() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isOnboardingCompleted, setIsOnboardingCompleted] = useState<boolean | null>(null);
 
-  // Check onboarding status on mount
-  useEffect(() => {
-    const checkOnboarding = async () => {
-      const completed = await OnboardingStorage.isOnboardingCompleted();
+  // Check onboarding status and session on mount and when screen focuses
+  const checkAuthAndOnboarding = useCallback(async () => {
+    console.log('🔍 Checking auth and onboarding status...');
+
+    try {
+      // Check if user has an active session
+      const { data: { session } } = await supabase.auth.getSession();
+      console.log('   Session:', session ? '✅ Active' : '❌ None');
+
+      // Check local onboarding completion first
+      let completed = await OnboardingStorage.isOnboardingCompleted();
+      console.log('   Local onboarding flag:', completed ? '✅ Completed' : '❌ Not completed');
+
+      // If user has a session but local flag is not set, check database as fallback
+      if (session?.user && !completed) {
+        console.log('   🔄 Checking database for onboarding status...');
+        const { data: profile } = await supabase
+          .from('user_profiles')
+          .select('onboarding_completed')
+          .eq('id', session.user.id)
+          .single();
+
+        if (profile?.onboarding_completed) {
+          console.log('   ✅ Found completed onboarding in database, syncing local flag');
+          await OnboardingStorage.setOnboardingCompleted();
+          completed = true;
+        }
+      }
+
       setIsOnboardingCompleted(completed);
-    };
-    checkOnboarding();
+    } catch (error) {
+      console.error('❌ Error checking auth/onboarding:', error);
+      // Default to false on error
+      setIsOnboardingCompleted(false);
+    }
   }, []);
+
+  useEffect(() => {
+    checkAuthAndOnboarding();
+  }, [checkAuthAndOnboarding]);
 
   // Load projects when screen gains focus
   const loadProjects = useCallback(async () => {
@@ -59,11 +92,13 @@ export default function HomeScreen() {
     }
   }, []);
 
-  // Use useFocusEffect to refresh projects when returning to this screen
+  // Use useFocusEffect to refresh auth, onboarding, and projects when returning to this screen
   useFocusEffect(
     useCallback(() => {
+      console.log('🎯 Home screen focused');
+      checkAuthAndOnboarding();
       loadProjects();
-    }, [loadProjects])
+    }, [checkAuthAndOnboarding, loadProjects])
   );
 
   // Refresh handler
@@ -105,19 +140,24 @@ export default function HomeScreen() {
 
   const hasProjects = projects.length > 0;
 
-  // Redirect to onboarding if not completed
-  if (isOnboardingCompleted === false) {
-    return <Redirect href="/onboarding/fact-stress" />;
-  }
-
   // Show loading while checking onboarding status
   if (isOnboardingCompleted === null) {
+    console.log('⏳ Waiting for onboarding status check...');
     return (
       <View style={[styles.container, styles.loadingContainer]}>
         <ActivityIndicator size="large" color={Colors.primary} />
+        <Text style={styles.loadingText}>Loading...</Text>
       </View>
     );
   }
+
+  // Redirect to onboarding if not completed
+  if (isOnboardingCompleted === false) {
+    console.log('🔀 Redirecting to onboarding (not completed)');
+    return <Redirect href="/onboarding/fact-stress" />;
+  }
+
+  console.log('✅ Rendering home screen (onboarding completed)');
 
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
