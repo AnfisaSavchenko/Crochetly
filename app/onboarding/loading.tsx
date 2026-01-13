@@ -120,17 +120,18 @@ const styles = StyleSheet.create({
   imageContainer: {
     alignItems: 'center',
     marginBottom: Spacing.xxl * 2,
+    minHeight: 280,
   },
   imageWrapper: {
-    marginBottom: Spacing.xl,
+    marginBottom: Spacing.xxl + Spacing.lg,
   },
   clockImage: {
-    width: 280,
-    height: 280,
+    width: 220,
+    height: 220,
   },
   progressContainer: {
     position: 'absolute',
-    bottom: -20,
+    bottom: 0,
     alignItems: 'center',
     justifyContent: 'center',
   },
