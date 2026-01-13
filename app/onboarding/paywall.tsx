@@ -83,8 +83,8 @@ export default function PaywallScreen() {
             <BlurView intensity={40} style={styles.blurOverlay} tint="light">
               <View style={styles.titleContainer}>
                 <StrokedText
-                  fontSize={48}
-                  lineHeight={56}
+                  fontSize={44}
+                  lineHeight={52}
                   color={Colors.background}
                   strokeColor={Colors.stroke}
                 >
@@ -176,7 +176,7 @@ const styles = StyleSheet.create({
     flexGrow: 1,
   },
   topSection: {
-    height: 360,
+    height: 280,
     width: '100%',
   },
   imageBackground: {
@@ -195,15 +195,15 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.paywallPink,
     paddingHorizontal: Spacing.lg,
-    paddingTop: Spacing.xxl,
+    paddingTop: Spacing.lg,
   },
   featuresContainer: {
-    marginBottom: Spacing.xxl,
+    marginBottom: Spacing.lg,
   },
   featureRow: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    marginBottom: Spacing.md,
+    marginBottom: Spacing.sm,
   },
   checkIcon: {
     marginRight: Spacing.sm,
@@ -214,12 +214,12 @@ const styles = StyleSheet.create({
     fontSize: FontSize.lg,
     fontFamily: Fonts.heavy,
     color: Colors.text,
-    lineHeight: 26,
+    lineHeight: 24,
   },
   subscriptionContainer: {
     flexDirection: 'row',
-    gap: Spacing.md,
-    marginBottom: Spacing.xxl,
+    gap: Spacing.sm,
+    marginBottom: Spacing.lg,
   },
   subscriptionCard: {
     flex: 1,
