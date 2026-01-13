@@ -1,6 +1,6 @@
 /**
  * Onboarding Paywall Screen
- * Single-screen premium subscription offer matching reference design
+ * Single-screen premium subscription offer with trial periods
  */
 
 import React, { useState } from 'react';
@@ -18,26 +18,25 @@ import * as Haptics from 'expo-haptics';
 import { StrokedText } from '@/components';
 import { Colors, Spacing, FontSize, Fonts, NeoBrutalist } from '@/constants/theme';
 import { Ionicons } from '@expo/vector-icons';
-import Svg, { Path } from 'react-native-svg';
 
 type SubscriptionOption = '7days' | '1month';
 
 interface SubscriptionCard {
   id: SubscriptionOption;
-  duration: string;
-  price: string;
+  trialText: string;
+  pricingText: string;
 }
 
 const SUBSCRIPTION_OPTIONS: SubscriptionCard[] = [
   {
     id: '7days',
-    duration: '7 days',
-    price: '$7',
+    trialText: '1 day free trial',
+    pricingText: 'then $7 per week',
   },
   {
     id: '1month',
-    duration: '1 month',
-    price: '$15',
+    trialText: '3 day free trial',
+    pricingText: 'then $15 per month',
   },
 ];
 
@@ -46,20 +45,6 @@ const FEATURES = [
   'Get step-by-step instructions, stitch by stitch',
   "Create patterns you won't find anywhere else",
 ];
-
-// Red curved arrow pointing up
-const CurvedArrow = () => (
-  <Svg width="60" height="50" viewBox="0 0 60 50" style={{ marginLeft: 4 }}>
-    <Path
-      d="M 10 45 Q 25 15, 40 10 L 35 5 M 40 10 L 45 15"
-      stroke="#FF0000"
-      strokeWidth="3"
-      fill="none"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-  </Svg>
-);
 
 export default function PaywallScreen() {
   const router = useRouter();
@@ -136,11 +121,8 @@ export default function PaywallScreen() {
                   style={styles.subscriptionCard}
                   onPress={() => handleSelectPlan(option.id)}
                 >
-                  <View style={styles.cardContent}>
-                    <Text style={styles.cardDuration}>{option.duration}</Text>
-                    <CurvedArrow />
-                  </View>
-                  <Text style={styles.cardPrice}>{option.price}</Text>
+                  <Text style={styles.cardTrialText}>{option.trialText}</Text>
+                  <Text style={styles.cardPricingText}>{option.pricingText}</Text>
                 </Pressable>
                 {/* Overlapping circle positioned at bottom center */}
                 <Pressable
@@ -251,31 +233,25 @@ const styles = StyleSheet.create({
     borderWidth: NeoBrutalist.borderWidth,
     borderColor: Colors.stroke,
     borderRadius: NeoBrutalist.borderRadius,
-    paddingTop: Spacing.md,
+    paddingTop: Spacing.lg,
     paddingHorizontal: Spacing.md,
-    paddingBottom: Spacing.lg + 10, // Extra padding to clear the overlapping circle
-    minHeight: 100,
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    paddingBottom: Spacing.lg + 12, // Extra padding to clear the overlapping circle
+    minHeight: 95,
+    alignItems: 'flex-start',
+    justifyContent: 'center',
+    gap: 6, // 6px spacing between trial and pricing text
   },
-  cardContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    width: '100%',
-  },
-  cardDuration: {
-    fontSize: 28,
+  cardTrialText: {
+    fontSize: FontSize.lg,
     fontFamily: Fonts.heavy,
     color: Colors.text,
-    lineHeight: 32,
+    lineHeight: 22,
   },
-  cardPrice: {
-    fontSize: FontSize.xl,
-    fontFamily: Fonts.heavy,
+  cardPricingText: {
+    fontSize: FontSize.md,
+    fontFamily: Fonts.light,
     color: Colors.text,
-    lineHeight: 28,
-    marginTop: -4,
+    lineHeight: 20,
   },
   radioCircle: {
     position: 'absolute',
