@@ -29,6 +29,24 @@ export default function AuthScreen() {
   const insets = useSafeAreaInsets();
   const [isLoading, setIsLoading] = React.useState<'google' | 'apple' | null>(null);
 
+  // Validate environment variables on mount
+  useEffect(() => {
+    const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL;
+    const supabaseKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
+
+    console.log('🔍 Environment Check:');
+    console.log('  SUPABASE_URL:', supabaseUrl ? '✅ Set' : '❌ Missing');
+    console.log('  SUPABASE_ANON_KEY:', supabaseKey ? '✅ Set' : '❌ Missing');
+
+    if (!supabaseUrl || !supabaseKey) {
+      console.error('❌ CRITICAL: Supabase credentials missing!');
+      Alert.alert(
+        'Configuration Error',
+        'Supabase credentials are not configured. Please check your environment variables.'
+      );
+    }
+  }, []);
+
   // Check if user is already authenticated
   useEffect(() => {
     const checkAuth = async () => {
@@ -64,6 +82,7 @@ export default function AuthScreen() {
     try {
       setIsLoading('google');
       console.log('🚀 INITIATING GOOGLE SIGN-IN');
+      console.log('═══════════════════════════════════════');
 
       // Get the redirect URI for OAuth
       const redirectTo = makeRedirectUri({
@@ -72,6 +91,10 @@ export default function AuthScreen() {
       });
 
       console.log('📍 Redirect URI:', redirectTo);
+      console.log('📍 Expected format: com.crochetly.app://auth/callback');
+      console.log('⚠️  This MUST match a Redirect URL in Supabase Dashboard!');
+      console.log('   Go to: Authentication → URL Configuration → Redirect URLs');
+      console.log('═══════════════════════════════════════');
 
       // Sign in with Google using Supabase
       const { data, error } = await supabase.auth.signInWithOAuth({
@@ -82,12 +105,27 @@ export default function AuthScreen() {
         },
       });
 
-      if (error) throw error;
-
-      if (!data?.url) {
-        throw new Error('No authorization URL returned');
+      if (error) {
+        console.error('❌ Supabase OAuth Error:', error);
+        if (error.message.includes('400')) {
+          console.error('💥 400 BAD REQUEST - Likely causes:');
+          console.error('   1. Redirect URI not whitelisted in Supabase');
+          console.error('   2. OAuth provider not enabled');
+          console.error('   3. Invalid OAuth credentials');
+          console.error('');
+          console.error('🔧 To fix:');
+          console.error('   • Add redirect URI to Supabase Dashboard');
+          console.error('   • Verify Google OAuth is enabled');
+          console.error('   • Check OAuth Client ID/Secret');
+        }
+        throw error;
       }
 
+      if (!data?.url) {
+        throw new Error('No authorization URL returned from Supabase');
+      }
+
+      console.log('✅ OAuth URL generated:', data.url);
       console.log('🌐 Opening OAuth browser...');
 
       // Open the OAuth URL in a browser
@@ -100,13 +138,14 @@ export default function AuthScreen() {
 
       if (result.type === 'cancel') {
         setIsLoading(null);
+        console.log('⚠️  User cancelled sign-in');
         Alert.alert('Sign-In Cancelled', 'You cancelled the sign-in process.');
       } else if (result.type === 'success') {
         // The auth state change listener will handle navigation
-        console.log('✅ OAuth success, waiting for session...');
+        console.log('✅ OAuth success, waiting for session establishment...');
       }
     } catch (error) {
-      console.error('Google Sign In error:', error);
+      console.error('❌ Google Sign In error:', error);
       setIsLoading(null);
 
       // Enhanced error messaging
@@ -116,7 +155,16 @@ export default function AuthScreen() {
       if (error && typeof error === 'object' && 'message' in error) {
         const errMsg = (error as Error).message.toLowerCase();
 
-        if (errMsg.includes('not enabled') || errMsg.includes('provider')) {
+        if (errMsg.includes('400') || errMsg.includes('bad request')) {
+          errorTitle = 'Configuration Error';
+          errorMessage =
+            '400 Bad Request - OAuth configuration issue.\n\n' +
+            'Please verify in Supabase Dashboard:\n' +
+            '1. Google OAuth is enabled\n' +
+            '2. Redirect URL is added:\n' +
+            '   com.crochetly.app://auth/callback\n' +
+            '3. OAuth credentials are valid';
+        } else if (errMsg.includes('not enabled') || errMsg.includes('provider')) {
           errorTitle = 'Configuration Error';
           errorMessage =
             'Google OAuth is not enabled for this app.\n\n' +
@@ -136,6 +184,7 @@ export default function AuthScreen() {
     try {
       setIsLoading('apple');
       console.log('🚀 INITIATING APPLE SIGN-IN');
+      console.log('═══════════════════════════════════════');
 
       // Get the redirect URI for OAuth
       const redirectTo = makeRedirectUri({
@@ -144,6 +193,10 @@ export default function AuthScreen() {
       });
 
       console.log('📍 Redirect URI:', redirectTo);
+      console.log('📍 Expected format: com.crochetly.app://auth/callback');
+      console.log('⚠️  This MUST match a Redirect URL in Supabase Dashboard!');
+      console.log('   Go to: Authentication → URL Configuration → Redirect URLs');
+      console.log('═══════════════════════════════════════');
 
       // Sign in with Apple using Supabase
       const { data, error } = await supabase.auth.signInWithOAuth({
@@ -154,12 +207,27 @@ export default function AuthScreen() {
         },
       });
 
-      if (error) throw error;
-
-      if (!data?.url) {
-        throw new Error('No authorization URL returned');
+      if (error) {
+        console.error('❌ Supabase OAuth Error:', error);
+        if (error.message.includes('400')) {
+          console.error('💥 400 BAD REQUEST - Likely causes:');
+          console.error('   1. Redirect URI not whitelisted in Supabase');
+          console.error('   2. OAuth provider not enabled');
+          console.error('   3. Invalid OAuth credentials');
+          console.error('');
+          console.error('🔧 To fix:');
+          console.error('   • Add redirect URI to Supabase Dashboard');
+          console.error('   • Verify Apple OAuth is enabled');
+          console.error('   • Check OAuth Service ID/Key ID');
+        }
+        throw error;
       }
 
+      if (!data?.url) {
+        throw new Error('No authorization URL returned from Supabase');
+      }
+
+      console.log('✅ OAuth URL generated:', data.url);
       console.log('🌐 Opening OAuth browser...');
 
       // Open the OAuth URL in a browser
@@ -172,13 +240,14 @@ export default function AuthScreen() {
 
       if (result.type === 'cancel') {
         setIsLoading(null);
+        console.log('⚠️  User cancelled sign-in');
         Alert.alert('Sign-In Cancelled', 'You cancelled the sign-in process.');
       } else if (result.type === 'success') {
         // The auth state change listener will handle navigation
-        console.log('✅ OAuth success, waiting for session...');
+        console.log('✅ OAuth success, waiting for session establishment...');
       }
     } catch (error) {
-      console.error('Apple Sign In error:', error);
+      console.error('❌ Apple Sign In error:', error);
       setIsLoading(null);
 
       // Enhanced error messaging
@@ -188,7 +257,16 @@ export default function AuthScreen() {
       if (error && typeof error === 'object' && 'message' in error) {
         const errMsg = (error as Error).message.toLowerCase();
 
-        if (errMsg.includes('not enabled') || errMsg.includes('provider')) {
+        if (errMsg.includes('400') || errMsg.includes('bad request')) {
+          errorTitle = 'Configuration Error';
+          errorMessage =
+            '400 Bad Request - OAuth configuration issue.\n\n' +
+            'Please verify in Supabase Dashboard:\n' +
+            '1. Apple OAuth is enabled\n' +
+            '2. Redirect URL is added:\n' +
+            '   com.crochetly.app://auth/callback\n' +
+            '3. OAuth credentials are valid';
+        } else if (errMsg.includes('not enabled') || errMsg.includes('provider')) {
           errorTitle = 'Configuration Error';
           errorMessage =
             'Apple OAuth is not enabled for this app.\n\n' +

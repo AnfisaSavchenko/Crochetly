@@ -11,9 +11,23 @@ import { AppState } from 'react-native';
 const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL || '';
 const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || '';
 
+console.log('🔍 Supabase Client Initialization');
+console.log('═══════════════════════════════════════');
+console.log('URL:', supabaseUrl ? `✅ ${supabaseUrl}` : '❌ Missing');
+console.log('Anon Key:', supabaseAnonKey ? '✅ Present' : '❌ Missing');
+console.log('═══════════════════════════════════════');
+
 if (!supabaseUrl || !supabaseAnonKey) {
-  console.warn('Supabase credentials not found. Authentication will not work.');
-  console.warn('Please configure EXPO_PUBLIC_SUPABASE_URL and EXPO_PUBLIC_SUPABASE_ANON_KEY in .env');
+  console.error('❌ CRITICAL: Supabase credentials not found!');
+  console.error('   Authentication will NOT work.');
+  console.error('');
+  console.error('🔧 To fix:');
+  console.error('   1. Ensure .env file exists in project root');
+  console.error('   2. Add these variables to .env:');
+  console.error('      EXPO_PUBLIC_SUPABASE_URL=your-project-url');
+  console.error('      EXPO_PUBLIC_SUPABASE_ANON_KEY=your-anon-key');
+  console.error('   3. Restart the development server');
+  console.error('═══════════════════════════════════════');
 }
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {

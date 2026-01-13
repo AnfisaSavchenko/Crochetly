@@ -18,49 +18,69 @@ export default function AuthCallback() {
     const handleCallback = async () => {
       try {
         console.log('📥 OAuth callback received');
-        console.log('Params:', params);
+        console.log('═══════════════════════════════════════');
+        console.log('🔍 All params:', JSON.stringify(params, null, 2));
 
-        // Extract the OAuth parameters from the URL
-        const url = params.url as string;
+        // Get all potential token/code locations
+        const accessToken = params.access_token as string;
+        const refreshToken = params.refresh_token as string;
+        const code = params.code as string;
+        const errorParam = params.error as string;
+        const errorDescription = params.error_description as string;
 
-        if (url) {
-          // Parse the URL to extract the auth code or access token
-          const urlObj = new URL(url);
-          const accessToken = urlObj.searchParams.get('access_token');
-          const refreshToken = urlObj.searchParams.get('refresh_token');
-          const code = urlObj.searchParams.get('code');
+        console.log('📦 Token Status:');
+        console.log('  Access Token:', accessToken ? '✅ Present' : '❌ Missing');
+        console.log('  Refresh Token:', refreshToken ? '✅ Present' : '❌ Missing');
+        console.log('  Auth Code:', code ? '✅ Present' : '❌ Missing');
 
-          console.log('Access Token:', accessToken ? '✅' : '❌');
-          console.log('Refresh Token:', refreshToken ? '✅' : '❌');
-          console.log('Auth Code:', code ? '✅' : '❌');
+        if (errorParam) {
+          console.error('❌ OAuth Error:', errorParam);
+          console.error('   Description:', errorDescription);
+          throw new Error(`OAuth error: ${errorParam} - ${errorDescription}`);
+        }
 
-          if (accessToken && refreshToken) {
-            // Set the session with the tokens
-            const { data, error } = await supabase.auth.setSession({
-              access_token: accessToken,
-              refresh_token: refreshToken,
-            });
+        if (accessToken && refreshToken) {
+          // Direct token exchange (implicit flow)
+          console.log('🔐 Using direct token exchange...');
+          const { data, error } = await supabase.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken,
+          });
 
-            if (error) throw error;
-
-            console.log('✅ Session established:', data.user?.id);
-            router.replace('/');
-          } else if (code) {
-            // Exchange the authorization code for a session
-            const { data, error } = await supabase.auth.exchangeCodeForSession(code);
-
-            if (error) throw error;
-
-            console.log('✅ Session established:', data.user?.id);
-            router.replace('/');
-          } else {
-            throw new Error('No valid OAuth tokens or code found in callback');
+          if (error) {
+            console.error('❌ Failed to set session:', error);
+            throw error;
           }
+
+          console.log('✅ Session established successfully');
+          console.log('   User ID:', data.user?.id);
+          console.log('   Email:', data.user?.email);
+          console.log('═══════════════════════════════════════');
+          router.replace('/');
+        } else if (code) {
+          // PKCE flow - exchange authorization code for session
+          console.log('🔐 Using PKCE flow (code exchange)...');
+          const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+
+          if (error) {
+            console.error('❌ Failed to exchange code for session:', error);
+            throw error;
+          }
+
+          console.log('✅ Session established successfully');
+          console.log('   User ID:', data.user?.id);
+          console.log('   Email:', data.user?.email);
+          console.log('═══════════════════════════════════════');
+          router.replace('/');
         } else {
-          throw new Error('No URL parameter found in callback');
+          console.error('❌ No valid OAuth tokens or code found');
+          console.error('   Expected: access_token + refresh_token OR code');
+          console.error('   Received params:', Object.keys(params).join(', '));
+          throw new Error('No valid OAuth credentials in callback URL');
         }
       } catch (error) {
         console.error('❌ OAuth callback error:', error);
+        console.error('═══════════════════════════════════════');
         // Navigate back to auth screen on error
         router.replace('/onboarding/auth');
       }
