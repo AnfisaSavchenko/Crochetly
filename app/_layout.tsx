@@ -32,7 +32,8 @@ export default function RootLayout() {
   const { isProcessing: isAuthProcessing } = useAuthCallback({
     supabaseClient: supabase,
     onSuccess: async ({ user }) => {
-      console.log('✅ OAuth sign-in successful from useAuthCallback');
+      console.log('═══════════════════════════════════════');
+      console.log('✅ OAuth sign-in successful!');
       console.log('   User ID:', user.id);
       console.log('   Email:', user.email);
 
@@ -40,17 +41,27 @@ export default function RootLayout() {
         // Save user profile with quiz data
         console.log('💾 Saving user profile...');
         await AuthService.saveUserProfileAfterAuth(user.id);
-        console.log('✅ User profile saved successfully');
+        console.log('✅ User profile saved to database');
 
-        // Small delay to ensure state updates propagate
-        await new Promise(resolve => setTimeout(resolve, 300));
+        // Give time for state to propagate through the app
+        console.log('⏳ Waiting for state synchronization...');
+        await new Promise(resolve => setTimeout(resolve, 800));
 
-        // Navigate to home
-        console.log('🏠 Navigating to home screen');
+        // Navigate to main screen
+        console.log('🚀 Redirecting to Main Screen (Dashboard)');
+        console.log('═══════════════════════════════════════');
+
+        // Clear the navigation stack and go to root
         router.replace('/');
       } catch (error) {
-        console.error('❌ Error saving user profile:', error);
-        // Still navigate even if profile save fails
+        console.error('═══════════════════════════════════════');
+        console.error('❌ Error during profile save:', error);
+        if (error instanceof Error) {
+          console.error('   Error:', error.message);
+        }
+        console.error('═══════════════════════════════════════');
+
+        // Navigate anyway - the user is authenticated
         router.replace('/');
       }
     },

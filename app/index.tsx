@@ -41,37 +41,65 @@ export default function HomeScreen() {
 
   // Check onboarding status and session on mount and when screen focuses
   const checkAuthAndOnboarding = useCallback(async () => {
-    console.log('🔍 Checking auth and onboarding status...');
+    console.log('════════════════════════════════════');
+    console.log('🔍 Checking auth and onboarding status');
 
     try {
       // Check if user has an active session
       const { data: { session } } = await supabase.auth.getSession();
-      console.log('   Session:', session ? '✅ Active' : '❌ None');
+      console.log('Session:', session ? '✅ Active' : '❌ None');
 
-      // Check local onboarding completion first
-      let completed = await OnboardingStorage.isOnboardingCompleted();
-      console.log('   Local onboarding flag:', completed ? '✅ Completed' : '❌ Not completed');
-
-      // If user has a session but local flag is not set, check database as fallback
-      if (session?.user && !completed) {
-        console.log('   🔄 Checking database for onboarding status...');
-        const { data: profile } = await supabase
-          .from('user_profiles')
-          .select('onboarding_completed')
-          .eq('id', session.user.id)
-          .single();
-
-        if (profile?.onboarding_completed) {
-          console.log('   ✅ Found completed onboarding in database, syncing local flag');
-          await OnboardingStorage.setOnboardingCompleted();
-          completed = true;
-        }
+      if (!session?.user) {
+        // No session - not onboarded
+        console.log('No session → Not onboarded');
+        console.log('════════════════════════════════════');
+        setIsOnboardingCompleted(false);
+        return;
       }
 
-      setIsOnboardingCompleted(completed);
+      console.log('User:', session.user.email);
+
+      // User has a session - check database first (source of truth)
+      console.log('Checking database...');
+      const { data: profile, error: profileError } = await supabase
+        .from('user_profiles')
+        .select('onboarding_completed')
+        .eq('id', session.user.id)
+        .maybeSingle(); // Use maybeSingle to handle case where profile doesn't exist
+
+      if (profileError) {
+        console.warn('Database error:', profileError.message);
+        // Fallback to local storage on database error
+        const localCompleted = await OnboardingStorage.isOnboardingCompleted();
+        console.log('Local flag:', localCompleted ? '✅ Complete' : '❌ Incomplete');
+        console.log('════════════════════════════════════');
+        setIsOnboardingCompleted(localCompleted);
+        return;
+      }
+
+      if (!profile) {
+        console.log('No profile found in database');
+        console.log('════════════════════════════════════');
+        setIsOnboardingCompleted(false);
+        return;
+      }
+
+      const dbCompleted = profile.onboarding_completed === true;
+      console.log('Database status:', dbCompleted ? '✅ Complete' : '❌ Incomplete');
+
+      if (dbCompleted) {
+        // Sync local flag with database
+        console.log('Syncing local flag...');
+        await OnboardingStorage.setOnboardingCompleted();
+        console.log('✅ User is fully onboarded');
+      }
+
+      console.log('════════════════════════════════════');
+      setIsOnboardingCompleted(dbCompleted);
     } catch (error) {
-      console.error('❌ Error checking auth/onboarding:', error);
-      // Default to false on error
+      console.error('❌ Error in checkAuthAndOnboarding:', error);
+      console.log('════════════════════════════════════');
+      // On error, default to false to be safe
       setIsOnboardingCompleted(false);
     }
   }, []);

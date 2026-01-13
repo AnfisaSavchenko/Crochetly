@@ -33,13 +33,24 @@ export default function AuthScreen() {
     supabaseClient: supabase,
   });
 
-  // Check if user is already authenticated
+  // Check if user is already authenticated and onboarding is complete
   useEffect(() => {
     const checkAuth = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
-        // User is already authenticated, navigate to home
-        router.replace('/');
+        // Check if onboarding is already completed in the database
+        const { data: profile } = await supabase
+          .from('user_profiles')
+          .select('onboarding_completed')
+          .eq('id', user.id)
+          .single();
+
+        if (profile?.onboarding_completed) {
+          console.log('✅ User already authenticated and onboarded, redirecting to main screen');
+          router.replace('/');
+        } else {
+          console.log('⚠️ User authenticated but onboarding not complete yet');
+        }
       }
     };
     checkAuth();
