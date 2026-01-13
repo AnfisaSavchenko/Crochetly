@@ -118,8 +118,7 @@ export default function PaywallScreen() {
                   onPress={() => handleSelectPlan(option.id)}
                 >
                   <Text style={styles.cardTrial}>{option.trial}</Text>
-                  <Text style={styles.cardDuration}>{option.duration}</Text>
-                  <Text style={styles.cardBilling}>{option.billingDetails}</Text>
+                  <Text style={styles.cardPrice}>{option.price}</Text>
                 </Pressable>
                 {/* Overlapping circle positioned at bottom center */}
                 <Pressable
@@ -218,27 +217,22 @@ const styles = StyleSheet.create({
     borderWidth: NeoBrutalist.borderWidth,
     borderColor: Colors.stroke,
     borderRadius: NeoBrutalist.borderRadius,
-    padding: Spacing.md,
-    paddingBottom: Spacing.sm,
-    minHeight: 100,
+    paddingTop: Spacing.lg,
+    paddingHorizontal: Spacing.md,
+    paddingBottom: Spacing.lg + 8, // Extra padding to clear the overlapping circle
+    minHeight: 90,
     alignItems: 'flex-start',
-    justifyContent: 'space-between',
+    justifyContent: 'center',
+    gap: 4,
   },
   cardTrial: {
     fontSize: FontSize.lg,
     fontFamily: Fonts.heavy,
     color: Colors.text,
-    marginBottom: 2,
   },
-  cardDuration: {
+  cardPrice: {
     fontSize: FontSize.xl,
     fontFamily: Fonts.heavy,
-    color: Colors.text,
-    marginBottom: 2,
-  },
-  cardBilling: {
-    fontSize: FontSize.sm,
-    fontFamily: Fonts.light,
     color: Colors.text,
   },
   radioCircle: {
