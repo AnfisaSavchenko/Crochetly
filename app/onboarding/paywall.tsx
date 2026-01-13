@@ -1,6 +1,6 @@
 /**
  * Onboarding Paywall Screen
- * Premium subscription options with split background design
+ * Single-screen premium subscription offer - no scrolling
  */
 
 import React, { useState } from 'react';
@@ -10,7 +10,6 @@ import {
   StyleSheet,
   ImageBackground,
   TouchableOpacity,
-  ScrollView,
   Pressable,
 } from 'react-native';
 import { useRouter } from 'expo-router';
@@ -65,105 +64,97 @@ export default function PaywallScreen() {
   };
 
   return (
-    <View style={styles.container}>
-      <ScrollView
-        contentContainerStyle={[
-          styles.scrollContent,
-          { paddingTop: insets.top + Spacing.lg },
-        ]}
-        showsVerticalScrollIndicator={false}
-      >
-        {/* Top Section: Blurred Image Background */}
-        <View style={styles.topSection}>
-          <ImageBackground
-            source={require('@/assets/images/paywall.png')}
-            style={styles.imageBackground}
-            resizeMode="cover"
+    <View style={[styles.container, { paddingTop: insets.top }]}>
+      {/* Top Section: Blurred Image Background */}
+      <View style={styles.topSection}>
+        <ImageBackground
+          source={require('@/assets/images/paywall.png')}
+          style={styles.imageBackground}
+          resizeMode="cover"
+        >
+          <BlurView intensity={40} style={styles.blurOverlay} tint="light" />
+        </ImageBackground>
+      </View>
+
+      {/* Bottom Section: Pink Background with Content */}
+      <View style={styles.bottomSection}>
+        {/* Title */}
+        <View style={styles.titleContainer}>
+          <StrokedText
+            fontSize={36}
+            lineHeight={42}
+            color={Colors.background}
+            strokeColor={Colors.stroke}
           >
-            <BlurView intensity={40} style={styles.blurOverlay} tint="light" />
-          </ImageBackground>
+            choose your{'\n'}journey
+          </StrokedText>
         </View>
 
-        {/* Bottom Section: Pink Background with Content */}
-        <View style={styles.bottomSection}>
-          {/* Title */}
-          <View style={styles.titleContainer}>
-            <StrokedText
-              fontSize={44}
-              lineHeight={52}
-              color={Colors.background}
-              strokeColor={Colors.stroke}
-            >
-              choose your{'\n'}journey
-            </StrokedText>
-          </View>
+        {/* Features List */}
+        <View style={styles.featuresContainer}>
+          {FEATURES.map((feature, index) => (
+            <View key={index} style={styles.featureRow}>
+              <Ionicons
+                name="checkmark"
+                size={24}
+                color={Colors.text}
+                style={styles.checkIcon}
+              />
+              <Text style={styles.featureText}>{feature}</Text>
+            </View>
+          ))}
+        </View>
 
-          {/* Features List */}
-          <View style={styles.featuresContainer}>
-            {FEATURES.map((feature, index) => (
-              <View key={index} style={styles.featureRow}>
-                <Ionicons
-                  name="checkmark"
-                  size={28}
-                  color={Colors.text}
-                  style={styles.checkIcon}
-                />
-                <Text style={styles.featureText}>{feature}</Text>
-              </View>
-            ))}
-          </View>
-
-          {/* Subscription Cards */}
-          <View style={styles.subscriptionContainer}>
-            {SUBSCRIPTION_OPTIONS.map((option) => {
-              const isSelected = selectedPlan === option.id;
-              return (
-                <Pressable
-                  key={option.id}
-                  style={[
-                    styles.subscriptionCard,
-                    isSelected && styles.subscriptionCardSelected,
-                  ]}
-                  onPress={() => handleSelectPlan(option.id)}
-                >
-                  <View style={styles.cardContent}>
-                    <View style={styles.cardTextContainer}>
-                      <Text style={styles.cardDuration}>{option.duration}</Text>
-                      <Text style={styles.cardPrice}>{option.price}</Text>
-                    </View>
-                    <View
-                      style={[
-                        styles.radioCircle,
-                        isSelected && styles.radioCircleSelected,
-                      ]}
-                    >
-                      {isSelected && (
-                        <Ionicons
-                          name="checkmark"
-                          size={24}
-                          color={Colors.text}
-                        />
-                      )}
-                    </View>
+        {/* Subscription Cards */}
+        <View style={styles.subscriptionContainer}>
+          {SUBSCRIPTION_OPTIONS.map((option) => {
+            const isSelected = selectedPlan === option.id;
+            return (
+              <Pressable
+                key={option.id}
+                style={[
+                  styles.subscriptionCard,
+                  isSelected && styles.subscriptionCardSelected,
+                ]}
+                onPress={() => handleSelectPlan(option.id)}
+              >
+                <View style={styles.cardContent}>
+                  <View style={styles.cardTextContainer}>
+                    <Text style={styles.cardDuration}>{option.duration}</Text>
+                    <Text style={styles.cardPrice}>{option.price}</Text>
                   </View>
-                </Pressable>
-              );
-            })}
-          </View>
-
-          {/* Continue Button */}
-          <TouchableOpacity
-            style={[
-              styles.continueButton,
-              { marginBottom: insets.bottom + Spacing.xl },
-            ]}
-            onPress={handleContinue}
-            activeOpacity={0.8}
-          >
-            <Text style={styles.continueButtonText}>Continue</Text>
-          </TouchableOpacity>
+                  <View
+                    style={[
+                      styles.radioCircle,
+                      isSelected && styles.radioCircleSelected,
+                    ]}
+                  >
+                    {isSelected && (
+                      <Ionicons
+                        name="checkmark"
+                        size={20}
+                        color={Colors.text}
+                      />
+                    )}
+                  </View>
+                </View>
+              </Pressable>
+            );
+          })}
         </View>
-      </ScrollView>
+
+        {/* Continue Button */}
+        <TouchableOpacity
+          style={[
+            styles.continueButton,
+            { marginBottom: insets.bottom > 0 ? insets.bottom : Spacing.md },
+          ]}
+          onPress={handleContinue}
+          activeOpacity={0.8}
+        >
+          <Text style={styles.continueButtonText}>Continue</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }
@@ -173,11 +164,8 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.paywallPink,
   },
-  scrollContent: {
-    flexGrow: 1,
-  },
   topSection: {
-    height: 240,
+    height: 140,
     width: '100%',
   },
   imageBackground: {
@@ -189,37 +177,38 @@ const styles = StyleSheet.create({
   },
   titleContainer: {
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: 12,
   },
   bottomSection: {
     flex: 1,
     backgroundColor: Colors.paywallPink,
     paddingHorizontal: Spacing.lg,
-    paddingTop: Spacing.lg,
+    paddingTop: Spacing.md,
+    justifyContent: 'space-between',
   },
   featuresContainer: {
-    marginBottom: Spacing.lg,
+    marginBottom: Spacing.md,
   },
   featureRow: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    marginBottom: Spacing.sm,
+    marginBottom: 6,
   },
   checkIcon: {
     marginRight: Spacing.sm,
-    marginTop: 2,
+    marginTop: 1,
   },
   featureText: {
     flex: 1,
-    fontSize: FontSize.lg,
+    fontSize: FontSize.md,
     fontFamily: Fonts.heavy,
     color: Colors.text,
-    lineHeight: 24,
+    lineHeight: 20,
   },
   subscriptionContainer: {
     flexDirection: 'row',
     gap: Spacing.sm,
-    marginBottom: Spacing.lg,
+    marginBottom: Spacing.md,
   },
   subscriptionCard: {
     flex: 1,
@@ -227,8 +216,8 @@ const styles = StyleSheet.create({
     borderWidth: NeoBrutalist.borderWidth,
     borderColor: Colors.stroke,
     borderRadius: NeoBrutalist.borderRadius,
-    padding: Spacing.lg,
-    minHeight: 100,
+    padding: Spacing.md,
+    minHeight: 85,
   },
   subscriptionCardSelected: {
     borderWidth: 3,
@@ -239,23 +228,23 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   cardTextContainer: {
-    marginBottom: Spacing.sm,
+    marginBottom: Spacing.xs,
   },
   cardDuration: {
-    fontSize: FontSize.xl,
+    fontSize: FontSize.lg,
     fontFamily: Fonts.heavy,
     color: Colors.text,
-    marginBottom: 4,
+    marginBottom: 2,
   },
   cardPrice: {
-    fontSize: FontSize.lg,
+    fontSize: FontSize.md,
     fontFamily: Fonts.light,
     color: Colors.text,
   },
   radioCircle: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     borderWidth: NeoBrutalist.borderWidth,
     borderColor: Colors.stroke,
     backgroundColor: 'transparent',
@@ -271,13 +260,13 @@ const styles = StyleSheet.create({
     borderWidth: NeoBrutalist.borderWidth,
     borderColor: Colors.stroke,
     borderRadius: 999,
-    paddingVertical: Spacing.lg,
+    paddingVertical: Spacing.md,
     paddingHorizontal: Spacing.xl,
     alignItems: 'center',
     justifyContent: 'center',
   },
   continueButtonText: {
-    fontSize: FontSize.xl,
+    fontSize: FontSize.lg,
     fontFamily: Fonts.heavy,
     color: Colors.text,
   },
