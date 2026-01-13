@@ -35,14 +35,14 @@ const SUBSCRIPTION_OPTIONS: SubscriptionCard[] = [
     duration: '7 days',
     price: '$7',
     trial: '1 day free trial',
-    billingDetails: 'then $7/week',
+    billingDetails: 'then $7 per week',
   },
   {
     id: '1month',
     duration: '1 month',
     price: '$15',
     trial: '3 days free trial',
-    billingDetails: 'then $15/month',
+    billingDetails: 'then $15 per month',
   },
 ];
 
@@ -118,7 +118,7 @@ export default function PaywallScreen() {
                   onPress={() => handleSelectPlan(option.id)}
                 >
                   <Text style={styles.cardTrial}>{option.trial}</Text>
-                  <Text style={styles.cardPrice}>{option.price}</Text>
+                  <Text style={styles.cardBilling}>{option.billingDetails}</Text>
                 </Pressable>
                 {/* Overlapping circle positioned at bottom center */}
                 <Pressable
@@ -219,21 +219,23 @@ const styles = StyleSheet.create({
     borderRadius: NeoBrutalist.borderRadius,
     paddingTop: Spacing.lg,
     paddingHorizontal: Spacing.md,
-    paddingBottom: Spacing.lg + 8, // Extra padding to clear the overlapping circle
-    minHeight: 90,
+    paddingBottom: Spacing.lg + 10, // Extra padding to clear the overlapping circle
+    minHeight: 95,
     alignItems: 'flex-start',
     justifyContent: 'center',
-    gap: 4,
+    gap: 6,
   },
   cardTrial: {
     fontSize: FontSize.lg,
     fontFamily: Fonts.heavy,
     color: Colors.text,
+    lineHeight: 22,
   },
-  cardPrice: {
-    fontSize: FontSize.xl,
-    fontFamily: Fonts.heavy,
+  cardBilling: {
+    fontSize: FontSize.md,
+    fontFamily: Fonts.light,
     color: Colors.text,
+    lineHeight: 20,
   },
   radioCircle: {
     position: 'absolute',
