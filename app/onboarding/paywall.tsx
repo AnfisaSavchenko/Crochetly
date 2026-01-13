@@ -1,6 +1,6 @@
 /**
  * Onboarding Paywall Screen
- * Single-screen premium subscription offer - no scrolling
+ * Single-screen premium subscription offer with centered piggy design
  */
 
 import React, { useState } from 'react';
@@ -8,12 +8,11 @@ import {
   View,
   Text,
   StyleSheet,
-  ImageBackground,
+  Image,
   TouchableOpacity,
   Pressable,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { BlurView } from 'expo-blur';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
 import { StrokedText } from '@/components';
@@ -64,97 +63,89 @@ export default function PaywallScreen() {
   };
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top }]}>
-      {/* Top Section: Blurred Image Background */}
-      <View style={styles.topSection}>
-        <ImageBackground
-          source={require('@/assets/images/paywall.png')}
-          style={styles.imageBackground}
-          resizeMode="cover"
-        >
-          <BlurView intensity={40} style={styles.blurOverlay} tint="light" />
-        </ImageBackground>
+    <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom > 0 ? insets.bottom : Spacing.md }]}>
+      {/* Piggy Image */}
+      <View style={styles.piggyContainer}>
+        <Image
+          source={require('@/assets/images/piggy.png')}
+          style={styles.piggyImage}
+          resizeMode="contain"
+        />
       </View>
 
-      {/* Bottom Section: Pink Background with Content */}
-      <View style={styles.bottomSection}>
-        {/* Title */}
-        <View style={styles.titleContainer}>
-          <StrokedText
-            fontSize={36}
-            lineHeight={42}
-            color={Colors.background}
-            strokeColor={Colors.stroke}
-          >
-            choose your{'\n'}journey
-          </StrokedText>
-        </View>
+      {/* Title */}
+      <View style={styles.titleContainer}>
+        <StrokedText
+          fontSize={36}
+          lineHeight={42}
+          color={Colors.background}
+          strokeColor={Colors.stroke}
+        >
+          Design your journey
+        </StrokedText>
+      </View>
 
-        {/* Features List */}
-        <View style={styles.featuresContainer}>
-          {FEATURES.map((feature, index) => (
-            <View key={index} style={styles.featureRow}>
-              <Ionicons
-                name="checkmark"
-                size={24}
-                color={Colors.text}
-                style={styles.checkIcon}
-              />
-              <Text style={styles.featureText}>{feature}</Text>
-            </View>
-          ))}
-        </View>
+      {/* Features List */}
+      <View style={styles.featuresContainer}>
+        {FEATURES.map((feature, index) => (
+          <View key={index} style={styles.featureRow}>
+            <Ionicons
+              name="checkmark"
+              size={24}
+              color={Colors.text}
+              style={styles.checkIcon}
+            />
+            <Text style={styles.featureText}>{feature}</Text>
+          </View>
+        ))}
+      </View>
 
-        {/* Subscription Cards */}
-        <View style={styles.subscriptionContainer}>
-          {SUBSCRIPTION_OPTIONS.map((option) => {
-            const isSelected = selectedPlan === option.id;
-            return (
-              <Pressable
-                key={option.id}
-                style={[
-                  styles.subscriptionCard,
-                  isSelected && styles.subscriptionCardSelected,
-                ]}
-                onPress={() => handleSelectPlan(option.id)}
-              >
-                <View style={styles.cardContent}>
-                  <View style={styles.cardTextContainer}>
-                    <Text style={styles.cardDuration}>{option.duration}</Text>
-                    <Text style={styles.cardPrice}>{option.price}</Text>
-                  </View>
-                  <View
-                    style={[
-                      styles.radioCircle,
-                      isSelected && styles.radioCircleSelected,
-                    ]}
-                  >
-                    {isSelected && (
-                      <Ionicons
-                        name="checkmark"
-                        size={20}
-                        color={Colors.text}
-                      />
-                    )}
-                  </View>
+      {/* Subscription Cards */}
+      <View style={styles.subscriptionContainer}>
+        {SUBSCRIPTION_OPTIONS.map((option) => {
+          const isSelected = selectedPlan === option.id;
+          return (
+            <Pressable
+              key={option.id}
+              style={[
+                styles.subscriptionCard,
+                isSelected && styles.subscriptionCardSelected,
+              ]}
+              onPress={() => handleSelectPlan(option.id)}
+            >
+              <View style={styles.cardContent}>
+                <View style={styles.cardTextContainer}>
+                  <Text style={styles.cardDuration}>{option.duration}</Text>
+                  <Text style={styles.cardPrice}>{option.price}</Text>
                 </View>
-              </Pressable>
-            );
-          })}
-        </View>
-
-        {/* Continue Button */}
-        <TouchableOpacity
-          style={[
-            styles.continueButton,
-            { marginBottom: insets.bottom > 0 ? insets.bottom : Spacing.md },
-          ]}
-          onPress={handleContinue}
-          activeOpacity={0.8}
-        >
-          <Text style={styles.continueButtonText}>Continue</Text>
-        </TouchableOpacity>
+                <View
+                  style={[
+                    styles.radioCircle,
+                    isSelected && styles.radioCircleSelected,
+                  ]}
+                >
+                  {isSelected && (
+                    <Ionicons
+                      name="checkmark"
+                      size={20}
+                      color={Colors.text}
+                    />
+                  )}
+                </View>
+              </View>
+            </Pressable>
+          );
+        })}
       </View>
+
+      {/* Continue Button */}
+      <TouchableOpacity
+        style={styles.continueButton}
+        onPress={handleContinue}
+        activeOpacity={0.8}
+      >
+        <Text style={styles.continueButtonText}>Continue</Text>
+      </TouchableOpacity>
     </View>
   );
 }
@@ -163,31 +154,25 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.paywallPink,
+    paddingHorizontal: Spacing.lg,
+    justifyContent: 'space-evenly',
+    alignItems: 'center',
   },
-  topSection: {
-    height: 140,
-    width: '100%',
+  piggyContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  imageBackground: {
-    flex: 1,
-    width: '100%',
-  },
-  blurOverlay: {
-    flex: 1,
+  piggyImage: {
+    width: 260,
+    height: 260,
   },
   titleContainer: {
     alignItems: 'center',
-    marginBottom: 12,
-  },
-  bottomSection: {
-    flex: 1,
-    backgroundColor: Colors.paywallPink,
-    paddingHorizontal: Spacing.lg,
-    paddingTop: Spacing.md,
-    justifyContent: 'space-between',
+    marginVertical: Spacing.sm,
   },
   featuresContainer: {
-    marginBottom: Spacing.md,
+    width: '100%',
+    marginVertical: Spacing.sm,
   },
   featureRow: {
     flexDirection: 'row',
@@ -208,7 +193,8 @@ const styles = StyleSheet.create({
   subscriptionContainer: {
     flexDirection: 'row',
     gap: Spacing.sm,
-    marginBottom: Spacing.md,
+    width: '100%',
+    marginVertical: Spacing.sm,
   },
   subscriptionCard: {
     flex: 1,
@@ -264,6 +250,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.xl,
     alignItems: 'center',
     justifyContent: 'center',
+    width: '100%',
+    marginTop: Spacing.sm,
   },
   continueButtonText: {
     fontSize: FontSize.lg,
