@@ -76,27 +76,28 @@ export default function PaywallScreen() {
         {/* Top Section: Blurred Image Background */}
         <View style={styles.topSection}>
           <ImageBackground
-            source={require('@/assets/images/paywall-crochet-toys.png')}
+            source={require('@/assets/images/paywall.png')}
             style={styles.imageBackground}
             resizeMode="cover"
           >
-            <BlurView intensity={40} style={styles.blurOverlay} tint="light">
-              <View style={styles.titleContainer}>
-                <StrokedText
-                  fontSize={44}
-                  lineHeight={52}
-                  color={Colors.background}
-                  strokeColor={Colors.stroke}
-                >
-                  Design your{'\n'}journey
-                </StrokedText>
-              </View>
-            </BlurView>
+            <BlurView intensity={40} style={styles.blurOverlay} tint="light" />
           </ImageBackground>
         </View>
 
         {/* Bottom Section: Pink Background with Content */}
         <View style={styles.bottomSection}>
+          {/* Title */}
+          <View style={styles.titleContainer}>
+            <StrokedText
+              fontSize={44}
+              lineHeight={52}
+              color={Colors.background}
+              strokeColor={Colors.stroke}
+            >
+              choose your{'\n'}journey
+            </StrokedText>
+          </View>
+
           {/* Features List */}
           <View style={styles.featuresContainer}>
             {FEATURES.map((feature, index) => (
@@ -176,7 +177,7 @@ const styles = StyleSheet.create({
     flexGrow: 1,
   },
   topSection: {
-    height: 280,
+    height: 240,
     width: '100%',
   },
   imageBackground: {
@@ -185,11 +186,10 @@ const styles = StyleSheet.create({
   },
   blurOverlay: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
   },
   titleContainer: {
-    paddingHorizontal: Spacing.lg,
+    alignItems: 'center',
+    marginBottom: 20,
   },
   bottomSection: {
     flex: 1,
