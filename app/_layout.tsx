@@ -4,11 +4,12 @@
  */
 
 import { useEffect, useState } from 'react';
-import { Stack } from 'expo-router';
+import { Stack, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { View, ActivityIndicator, StyleSheet } from 'react-native';
+import { View, ActivityIndicator, StyleSheet, Alert } from 'react-native';
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
+import { useAuthCallback } from '@fastshot/auth';
 import { supabase } from '@/services/supabaseClient';
 import { AuthService } from '@/services/authService';
 import { ImagePreloader } from '@/services/imagePreloader';
@@ -18,12 +19,41 @@ import { Colors } from '@/constants/theme';
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
+  const router = useRouter();
   const [fontsLoaded, fontError] = useFonts({
     'SFUIText-Heavy': require('../assets/fonts/SFUIText-Heavy.ttf'),
     'SFUIText-Light': require('../assets/fonts/SFUIText-Light.ttf'),
   });
 
   const [imagesPreloaded, setImagesPreloaded] = useState(false);
+
+  // Handle OAuth callbacks from Auth Broker
+  const { isProcessing: isAuthProcessing } = useAuthCallback({
+    supabaseClient: supabase,
+    onSuccess: async ({ user }) => {
+      console.log('✅ OAuth sign-in successful');
+      console.log('   User ID:', user.id);
+      console.log('   Email:', user.email);
+
+      try {
+        // Save user profile with quiz data
+        await AuthService.saveUserProfileAfterAuth(user.id);
+        console.log('✅ User profile saved successfully');
+      } catch (error) {
+        console.error('❌ Error saving user profile:', error);
+      }
+
+      // Navigate to home
+      router.replace('/');
+    },
+    onError: (error) => {
+      console.error('❌ OAuth callback error:', error);
+      Alert.alert(
+        'Sign-In Failed',
+        error.message || 'An error occurred during sign-in. Please try again.'
+      );
+    },
+  });
 
   // Preload images on mount
   useEffect(() => {
@@ -65,8 +95,8 @@ export default function RootLayout() {
     }
   }, [fontsLoaded, fontError, imagesPreloaded]);
 
-  // Show loading state while fonts and images load
-  if ((!fontsLoaded && !fontError) || !imagesPreloaded) {
+  // Show loading state while fonts and images load, or during auth processing
+  if ((!fontsLoaded && !fontError) || !imagesPreloaded || isAuthProcessing) {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color={Colors.primary} />
