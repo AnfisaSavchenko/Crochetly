@@ -1,6 +1,6 @@
 /**
  * Onboarding Paywall Screen
- * Single-screen premium subscription offer with centered piggy design
+ * Single-screen premium subscription offer matching reference design
  */
 
 import React, { useState } from 'react';
@@ -63,12 +63,12 @@ export default function PaywallScreen() {
   };
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom > 0 ? insets.bottom : Spacing.md }]}>
-      {/* Piggy Image */}
-      <View style={styles.piggyContainer}>
+    <View style={[styles.container, { paddingTop: insets.top + Spacing.md, paddingBottom: insets.bottom > 0 ? insets.bottom + Spacing.md : Spacing.lg }]}>
+      {/* Hero Image */}
+      <View style={styles.heroContainer}>
         <Image
-          source={require('@/assets/images/piggy.png')}
-          style={styles.piggyImage}
+          source={require('@/assets/images/paywall.png')}
+          style={styles.heroImage}
           resizeMode="contain"
         />
       </View>
@@ -76,12 +76,12 @@ export default function PaywallScreen() {
       {/* Title */}
       <View style={styles.titleContainer}>
         <StrokedText
-          fontSize={36}
-          lineHeight={42}
+          fontSize={40}
+          lineHeight={48}
           color={Colors.background}
           strokeColor={Colors.stroke}
         >
-          Design your journey
+          Design your{'\n'}journey
         </StrokedText>
       </View>
 
@@ -91,7 +91,7 @@ export default function PaywallScreen() {
           <View key={index} style={styles.featureRow}>
             <Ionicons
               name="checkmark"
-              size={24}
+              size={26}
               color={Colors.text}
               style={styles.checkIcon}
             />
@@ -100,42 +100,40 @@ export default function PaywallScreen() {
         ))}
       </View>
 
-      {/* Subscription Cards */}
-      <View style={styles.subscriptionContainer}>
-        {SUBSCRIPTION_OPTIONS.map((option) => {
-          const isSelected = selectedPlan === option.id;
-          return (
-            <Pressable
-              key={option.id}
-              style={[
-                styles.subscriptionCard,
-                isSelected && styles.subscriptionCardSelected,
-              ]}
-              onPress={() => handleSelectPlan(option.id)}
-            >
-              <View style={styles.cardContent}>
-                <View style={styles.cardTextContainer}>
+      {/* Subscription Cards with overlapping circles */}
+      <View style={styles.subscriptionWrapper}>
+        <View style={styles.subscriptionContainer}>
+          {SUBSCRIPTION_OPTIONS.map((option) => {
+            const isSelected = selectedPlan === option.id;
+            return (
+              <View key={option.id} style={styles.cardWrapper}>
+                <Pressable
+                  style={styles.subscriptionCard}
+                  onPress={() => handleSelectPlan(option.id)}
+                >
                   <Text style={styles.cardDuration}>{option.duration}</Text>
                   <Text style={styles.cardPrice}>{option.price}</Text>
-                </View>
-                <View
+                </Pressable>
+                {/* Overlapping circle positioned at bottom center */}
+                <Pressable
                   style={[
                     styles.radioCircle,
                     isSelected && styles.radioCircleSelected,
                   ]}
+                  onPress={() => handleSelectPlan(option.id)}
                 >
                   {isSelected && (
                     <Ionicons
                       name="checkmark"
-                      size={20}
+                      size={22}
                       color={Colors.text}
                     />
                   )}
-                </View>
+                </Pressable>
               </View>
-            </Pressable>
-          );
-        })}
+            );
+          })}
+        </View>
       </View>
 
       {/* Continue Button */}
@@ -155,72 +153,71 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.paywallPink,
     paddingHorizontal: Spacing.lg,
-    justifyContent: 'space-evenly',
+    justifyContent: 'space-between',
     alignItems: 'center',
   },
-  piggyContainer: {
+  heroContainer: {
     alignItems: 'center',
     justifyContent: 'center',
   },
-  piggyImage: {
-    width: 260,
-    height: 260,
+  heroImage: {
+    width: 240,
+    height: 240,
   },
   titleContainer: {
     alignItems: 'center',
-    marginVertical: Spacing.sm,
+    marginVertical: Spacing.xs,
   },
   featuresContainer: {
     width: '100%',
-    marginVertical: Spacing.sm,
+    alignItems: 'flex-start',
+    paddingHorizontal: Spacing.xs,
   },
   featureRow: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    marginBottom: 6,
+    marginBottom: 8,
+    width: '100%',
   },
   checkIcon: {
     marginRight: Spacing.sm,
-    marginTop: 1,
+    marginTop: 2,
   },
   featureText: {
     flex: 1,
     fontSize: FontSize.md,
     fontFamily: Fonts.heavy,
     color: Colors.text,
-    lineHeight: 20,
+    lineHeight: 22,
   },
-  subscriptionContainer: {
-    flexDirection: 'row',
-    gap: Spacing.sm,
+  subscriptionWrapper: {
     width: '100%',
     marginVertical: Spacing.sm,
   },
-  subscriptionCard: {
+  subscriptionContainer: {
+    flexDirection: 'row',
+    gap: Spacing.md,
+    width: '100%',
+  },
+  cardWrapper: {
     flex: 1,
+    position: 'relative',
+    marginBottom: 20, // Space for overlapping circle
+  },
+  subscriptionCard: {
     backgroundColor: Colors.background,
     borderWidth: NeoBrutalist.borderWidth,
     borderColor: Colors.stroke,
     borderRadius: NeoBrutalist.borderRadius,
-    padding: Spacing.md,
-    minHeight: 85,
-  },
-  subscriptionCardSelected: {
-    borderWidth: 3,
-    borderColor: Colors.stroke,
-  },
-  cardContent: {
-    flex: 1,
-    justifyContent: 'space-between',
-  },
-  cardTextContainer: {
-    marginBottom: Spacing.xs,
+    padding: Spacing.lg,
+    paddingBottom: Spacing.md,
+    minHeight: 90,
   },
   cardDuration: {
-    fontSize: FontSize.lg,
+    fontSize: FontSize.xl,
     fontFamily: Fonts.heavy,
     color: Colors.text,
-    marginBottom: 2,
+    marginBottom: 4,
   },
   cardPrice: {
     fontSize: FontSize.md,
@@ -228,15 +225,18 @@ const styles = StyleSheet.create({
     color: Colors.text,
   },
   radioCircle: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    position: 'absolute',
+    bottom: -20,
+    left: '50%',
+    marginLeft: -20,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     borderWidth: NeoBrutalist.borderWidth,
     borderColor: Colors.stroke,
-    backgroundColor: 'transparent',
+    backgroundColor: Colors.paywallPink,
     alignItems: 'center',
     justifyContent: 'center',
-    alignSelf: 'flex-end',
   },
   radioCircleSelected: {
     backgroundColor: Colors.primary,
@@ -246,12 +246,11 @@ const styles = StyleSheet.create({
     borderWidth: NeoBrutalist.borderWidth,
     borderColor: Colors.stroke,
     borderRadius: 999,
-    paddingVertical: Spacing.md,
+    paddingVertical: Spacing.lg,
     paddingHorizontal: Spacing.xl,
     alignItems: 'center',
     justifyContent: 'center',
     width: '100%',
-    marginTop: Spacing.sm,
   },
   continueButtonText: {
     fontSize: FontSize.lg,
