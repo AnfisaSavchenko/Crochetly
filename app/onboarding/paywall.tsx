@@ -18,6 +18,7 @@ import * as Haptics from 'expo-haptics';
 import { StrokedText } from '@/components';
 import { Colors, Spacing, FontSize, Fonts, NeoBrutalist } from '@/constants/theme';
 import { Ionicons } from '@expo/vector-icons';
+import Svg, { Path } from 'react-native-svg';
 
 type SubscriptionOption = '7days' | '1month';
 
@@ -25,8 +26,6 @@ interface SubscriptionCard {
   id: SubscriptionOption;
   duration: string;
   price: string;
-  trial: string;
-  billingDetails: string;
 }
 
 const SUBSCRIPTION_OPTIONS: SubscriptionCard[] = [
@@ -34,15 +33,11 @@ const SUBSCRIPTION_OPTIONS: SubscriptionCard[] = [
     id: '7days',
     duration: '7 days',
     price: '$7',
-    trial: '1 day free trial',
-    billingDetails: 'then $7 per week',
   },
   {
     id: '1month',
     duration: '1 month',
     price: '$15',
-    trial: '3 days free trial',
-    billingDetails: 'then $15 per month',
   },
 ];
 
@@ -51,6 +46,20 @@ const FEATURES = [
   'Get step-by-step instructions, stitch by stitch',
   "Create patterns you won't find anywhere else",
 ];
+
+// Red curved arrow pointing up
+const CurvedArrow = () => (
+  <Svg width="60" height="50" viewBox="0 0 60 50" style={{ marginLeft: 4 }}>
+    <Path
+      d="M 10 45 Q 25 15, 40 10 L 35 5 M 40 10 L 45 15"
+      stroke="#FF0000"
+      strokeWidth="3"
+      fill="none"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </Svg>
+);
 
 export default function PaywallScreen() {
   const router = useRouter();
@@ -70,6 +79,16 @@ export default function PaywallScreen() {
 
   return (
     <View style={[styles.container, { paddingTop: insets.top + Spacing.md, paddingBottom: insets.bottom > 0 ? insets.bottom + Spacing.md : Spacing.lg }]}>
+      {/* Back Button */}
+      <TouchableOpacity
+        style={styles.backButton}
+        onPress={() => router.back()}
+        activeOpacity={0.7}
+      >
+        <Ionicons name="chevron-back" size={20} color={Colors.text} />
+        <Text style={styles.backButtonText}>Camera</Text>
+      </TouchableOpacity>
+
       {/* Hero Image */}
       <View style={styles.heroContainer}>
         <Image
@@ -117,8 +136,11 @@ export default function PaywallScreen() {
                   style={styles.subscriptionCard}
                   onPress={() => handleSelectPlan(option.id)}
                 >
-                  <Text style={styles.cardTrial}>{option.trial}</Text>
-                  <Text style={styles.cardBilling}>{option.billingDetails}</Text>
+                  <View style={styles.cardContent}>
+                    <Text style={styles.cardDuration}>{option.duration}</Text>
+                    <CurvedArrow />
+                  </View>
+                  <Text style={styles.cardPrice}>{option.price}</Text>
                 </Pressable>
                 {/* Overlapping circle positioned at bottom center */}
                 <Pressable
@@ -161,6 +183,18 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.lg,
     justifyContent: 'space-between',
     alignItems: 'center',
+  },
+  backButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    marginBottom: Spacing.sm,
+  },
+  backButtonText: {
+    fontSize: FontSize.md,
+    fontFamily: Fonts.heavy,
+    color: Colors.text,
+    marginLeft: 2,
   },
   heroContainer: {
     alignItems: 'center',
@@ -217,25 +251,31 @@ const styles = StyleSheet.create({
     borderWidth: NeoBrutalist.borderWidth,
     borderColor: Colors.stroke,
     borderRadius: NeoBrutalist.borderRadius,
-    paddingTop: Spacing.lg,
+    paddingTop: Spacing.md,
     paddingHorizontal: Spacing.md,
     paddingBottom: Spacing.lg + 10, // Extra padding to clear the overlapping circle
-    minHeight: 95,
-    alignItems: 'flex-start',
-    justifyContent: 'center',
-    gap: 6,
+    minHeight: 100,
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
-  cardTrial: {
-    fontSize: FontSize.lg,
+  cardContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    width: '100%',
+  },
+  cardDuration: {
+    fontSize: 28,
     fontFamily: Fonts.heavy,
     color: Colors.text,
-    lineHeight: 22,
+    lineHeight: 32,
   },
-  cardBilling: {
-    fontSize: FontSize.md,
-    fontFamily: Fonts.light,
+  cardPrice: {
+    fontSize: FontSize.xl,
+    fontFamily: Fonts.heavy,
     color: Colors.text,
-    lineHeight: 20,
+    lineHeight: 28,
+    marginTop: -4,
   },
   radioCircle: {
     position: 'absolute',

@@ -5,7 +5,7 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "com.crochetly.app",
+    "scheme": "fastshot",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "ios": {
@@ -17,7 +17,9 @@
         "ITSAppUsesNonExemptEncryption": false,
         "CFBundleURLTypes": [
           {
-            "CFBundleURLSchemes": ["com.crochetly.app"]
+            "CFBundleURLSchemes": [
+              "com.crochetly.app"
+            ]
           }
         ]
       }
