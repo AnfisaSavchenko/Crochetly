@@ -3,7 +3,7 @@
  * Main navigation structure for Crochetly with custom font loading and auth callback handling
  */
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
@@ -11,6 +11,7 @@ import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
 import { supabase } from '@/services/supabaseClient';
 import { AuthService } from '@/services/authService';
+import { ImagePreloader } from '@/services/imagePreloader';
 import { Colors } from '@/constants/theme';
 
 // Prevent splash screen from auto-hiding
@@ -21,6 +22,18 @@ export default function RootLayout() {
     'SFUIText-Heavy': require('../assets/fonts/SFUIText-Heavy.ttf'),
     'SFUIText-Light': require('../assets/fonts/SFUIText-Light.ttf'),
   });
+
+  const [imagesPreloaded, setImagesPreloaded] = useState(false);
+
+  // Preload images on mount
+  useEffect(() => {
+    const preloadImages = async () => {
+      await ImagePreloader.preloadImages();
+      setImagesPreloaded(true);
+    };
+
+    preloadImages();
+  }, []);
 
   // Listen for auth state changes and save user profile
   useEffect(() => {
@@ -45,14 +58,15 @@ export default function RootLayout() {
     };
   }, []);
 
+  // Hide splash screen only when both fonts and images are ready
   useEffect(() => {
-    if (fontsLoaded || fontError) {
+    if ((fontsLoaded || fontError) && imagesPreloaded) {
       SplashScreen.hideAsync();
     }
-  }, [fontsLoaded, fontError]);
+  }, [fontsLoaded, fontError, imagesPreloaded]);
 
-  // Show loading state while fonts load
-  if (!fontsLoaded && !fontError) {
+  // Show loading state while fonts and images load
+  if ((!fontsLoaded && !fontError) || !imagesPreloaded) {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color={Colors.primary} />

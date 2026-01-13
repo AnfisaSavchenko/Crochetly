@@ -17,11 +17,14 @@ export default function OnboardingLayout() {
         gestureEnabled: false, // Disable swipe back to prevent skipping
       }}
     >
-      <Stack.Screen name="welcome" />
-      <Stack.Screen name="time-fact" />
-      <Stack.Screen name="well-being" />
-      <Stack.Screen name="skill-level" />
-      <Stack.Screen name="creation-intent" />
+      <Stack.Screen name="fact-stress" />
+      <Stack.Screen name="fact-teapot" />
+      <Stack.Screen name="fact-airplane" />
+      <Stack.Screen name="quiz-level" />
+      <Stack.Screen name="quiz-skills" />
+      <Stack.Screen name="quiz-target" />
+      <Stack.Screen name="quiz-motivation" />
+      <Stack.Screen name="loading" />
       <Stack.Screen name="auth" />
     </Stack>
   );

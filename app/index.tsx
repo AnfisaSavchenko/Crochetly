@@ -107,7 +107,7 @@ export default function HomeScreen() {
 
   // Redirect to onboarding if not completed
   if (isOnboardingCompleted === false) {
-    return <Redirect href="/onboarding/welcome" />;
+    return <Redirect href="/onboarding/fact-stress" />;
   }
 
   // Show loading while checking onboarding status

@@ -157,7 +157,7 @@ export default function SettingsScreen() {
                 [
                   {
                     text: 'OK',
-                    onPress: () => router.replace('/onboarding/welcome'),
+                    onPress: () => router.replace('/onboarding/fact-stress'),
                   },
                 ]
               );
