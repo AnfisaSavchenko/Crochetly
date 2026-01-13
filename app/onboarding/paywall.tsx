@@ -172,11 +172,12 @@ const styles = StyleSheet.create({
     width: '100%',
     alignItems: 'flex-start',
     paddingHorizontal: Spacing.xs,
+    marginBottom: Spacing.xs,
   },
   featureRow: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    marginBottom: 8,
+    marginBottom: 6,
     width: '100%',
   },
   checkIcon: {
@@ -192,7 +193,8 @@ const styles = StyleSheet.create({
   },
   subscriptionWrapper: {
     width: '100%',
-    marginVertical: Spacing.sm,
+    marginTop: Spacing.xs,
+    marginBottom: Spacing.xs,
   },
   subscriptionContainer: {
     flexDirection: 'row',
@@ -202,7 +204,7 @@ const styles = StyleSheet.create({
   cardWrapper: {
     flex: 1,
     position: 'relative',
-    marginBottom: 20, // Space for overlapping circle
+    marginBottom: 16, // Reduced space for tighter layout
   },
   subscriptionCard: {
     backgroundColor: Colors.background,
@@ -212,6 +214,7 @@ const styles = StyleSheet.create({
     padding: Spacing.lg,
     paddingBottom: Spacing.md,
     minHeight: 90,
+    alignItems: 'flex-start',
   },
   cardDuration: {
     fontSize: FontSize.xl,
@@ -228,7 +231,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: -20,
     left: '50%',
-    marginLeft: -20,
+    transform: [{ translateX: -20 }], // Perfect centering for 40px circle
     width: 40,
     height: 40,
     borderRadius: 20,
@@ -251,6 +254,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     width: '100%',
+    marginTop: Spacing.xs,
   },
   continueButtonText: {
     fontSize: FontSize.lg,
