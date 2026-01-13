@@ -11,6 +11,7 @@ const ONBOARDING_IMAGES = [
   require('@/assets/images/didyuknow2.png'),
   require('@/assets/images/fromlondontoparis.png'),
   require('@/assets/images/clock.png'),
+  require('@/assets/images/paywall-crochet-toys.png'),
 ];
 
 export class ImagePreloader {

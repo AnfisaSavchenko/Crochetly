@@ -52,9 +52,9 @@ export default function LoadingScreen() {
 
       if (currentStep >= steps) {
         clearInterval(timer);
-        // Navigate to auth screen after loading completes
+        // Navigate to paywall screen after loading completes
         setTimeout(() => {
-          router.push('/onboarding/auth');
+          router.push('/onboarding/paywall');
         }, 500);
       }
     }, interval);

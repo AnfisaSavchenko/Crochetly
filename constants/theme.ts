@@ -20,6 +20,9 @@ export const Colors = {
   primaryLight: '#F4C4D0',
   primaryDark: '#D9899A',
 
+  // Paywall Pink (exact: #F4A6BB)
+  paywallPink: '#F4A6BB',
+
   // Card/Surface - Off-White
   surface: '#F2F2F2',
   card: '#F2F2F2',
