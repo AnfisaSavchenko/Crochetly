@@ -18,13 +18,13 @@ import { CTAButton } from './components';
 import { OnboardingStorage } from '@/services/onboardingStorage';
 import { Colors, Spacing, FontSize, Fonts, BorderRadius, Shadow } from '@/constants/theme';
 
-type SkillOption = 'videos' | 'photos' | 'written' | 'mix';
+type SkillOption = 'precise' | 'quick' | 'patient' | 'creative';
 
 const SKILL_OPTIONS = [
-  { id: 'videos' as SkillOption, emoji: '🎬', label: 'Short videos' },
-  { id: 'photos' as SkillOption, emoji: '📷', label: 'Step-by-step photos' },
-  { id: 'written' as SkillOption, emoji: '📝', label: 'Written instructions' },
-  { id: 'mix' as SkillOption, emoji: '📚', label: 'A mix of everything' },
+  { id: 'precise' as SkillOption, emoji: '🎯', label: "I'm very precise and detailed" },
+  { id: 'quick' as SkillOption, emoji: '⚡', label: "I'm a quick and efficient learner" },
+  { id: 'patient' as SkillOption, emoji: '🧘', label: "I have a steady and patient hand" },
+  { id: 'creative' as SkillOption, emoji: '🎨', label: "I'm creative and love to experiment" },
 ];
 
 export default function QuizSkillsScreen() {
@@ -130,9 +130,14 @@ const styles = StyleSheet.create({
     ...Shadow.brutal,
   },
   optionCardSelected: {
-    backgroundColor: Colors.primaryLight,
-    borderColor: Colors.primary,
-    borderWidth: 2,
+    backgroundColor: Colors.paywallPink,
+    borderColor: Colors.stroke,
+    borderWidth: 2.5,
+    shadowColor: Colors.primary,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.5,
+    shadowRadius: 8,
+    elevation: 8,
   },
   optionEmoji: {
     fontSize: 24,

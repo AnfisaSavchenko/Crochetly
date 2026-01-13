@@ -123,11 +123,11 @@ const styles = StyleSheet.create({
     minHeight: 280,
   },
   imageWrapper: {
-    marginBottom: Spacing.xxl + Spacing.lg,
+    marginBottom: Spacing.xxl * 3,
   },
   clockImage: {
-    width: 220,
-    height: 220,
+    width: 180,
+    height: 180,
   },
   progressContainer: {
     position: 'absolute',
@@ -146,9 +146,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   progressText: {
-    fontSize: FontSize.xxl,
+    fontSize: 28,
     fontFamily: Fonts.heavy,
     color: Colors.text,
+    letterSpacing: -0.5,
   },
   helperText: {
     fontSize: FontSize.md,
