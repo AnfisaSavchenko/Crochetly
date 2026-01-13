@@ -8,4 +8,5 @@ export { EmptyState } from './EmptyState';
 export { ProjectCard } from './ProjectCard';
 export { StrokedText, LayeredStrokedText } from './StrokedText';
 export { StitchTutorialModal, DETAILED_STITCH_GUIDE } from './StitchTutorialModal';
+export { LoadingScreen } from './LoadingScreen';
 export type { StitchTutorial } from './StitchTutorialModal';

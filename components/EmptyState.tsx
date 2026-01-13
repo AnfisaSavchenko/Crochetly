@@ -1,6 +1,6 @@
 /**
  * Empty State Component
- * Neo-Brutalist "Retro Pop" design
+ * Neo-Brutalist "Retro Pop" design with prominent New Project button
  */
 
 import React from 'react';
@@ -9,19 +9,23 @@ import {
   Text,
   StyleSheet,
   ViewStyle,
+  TouchableOpacity,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { Colors, Spacing, FontSize, Fonts, BorderRadius, NeoBrutalist } from '@/constants/theme';
 
 interface EmptyStateProps {
   title?: string;
   message?: string;
   style?: ViewStyle;
+  onNewProject?: () => void;
 }
 
 export const EmptyState: React.FC<EmptyStateProps> = ({
   title = "No projects yet!",
-  message = "Tap the + button to create your first crochet pattern",
+  message = "Turn any photo into a crochet pattern with AI magic ✨",
   style,
+  onNewProject,
 }) => {
   return (
     <View style={[styles.container, style]}>
@@ -33,6 +37,18 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
       {/* Text Content */}
       <Text style={styles.title}>{title}</Text>
       <Text style={styles.message}>{message}</Text>
+
+      {/* Prominent New Project Button - Yellow Neo-Brutalist Style */}
+      {onNewProject && (
+        <TouchableOpacity
+          style={styles.newProjectButton}
+          onPress={onNewProject}
+          activeOpacity={0.8}
+        >
+          <Ionicons name="camera" size={24} color={Colors.text} style={styles.buttonIcon} />
+          <Text style={styles.buttonText}>New Project</Text>
+        </TouchableOpacity>
+      )}
     </View>
   );
 };
@@ -77,6 +93,33 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: 24,
     maxWidth: 280,
+    marginBottom: Spacing.xl,
+  },
+  newProjectButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Colors.primary, // Yellow
+    paddingVertical: Spacing.lg,
+    paddingHorizontal: Spacing.xxl,
+    borderRadius: 999, // Full rounded
+    borderWidth: NeoBrutalist.borderWidth,
+    borderColor: NeoBrutalist.borderColor,
+    // Neo-Brutalist shadow
+    shadowColor: Colors.stroke,
+    shadowOffset: { width: 4, height: 4 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 0,
+  },
+  buttonIcon: {
+    marginRight: Spacing.sm,
+  },
+  buttonText: {
+    fontSize: FontSize.lg,
+    fontFamily: Fonts.heavy,
+    color: Colors.text,
+    letterSpacing: 0.5,
   },
 });
 

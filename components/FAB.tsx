@@ -1,6 +1,6 @@
 /**
  * Floating Action Button Component
- * Neo-Brutalist style - Pink fill with black border
+ * Neo-Brutalist style - Custard Yellow fill with black border and shadow
  */
 
 import React from 'react';
@@ -76,6 +76,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderWidth: NeoBrutalist.borderWidth,
     borderColor: NeoBrutalist.borderColor,
+    // Neo-Brutalist shadow for prominence
+    shadowColor: Colors.stroke,
+    shadowOffset: { width: 4, height: 4 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 0,
   },
 });
 

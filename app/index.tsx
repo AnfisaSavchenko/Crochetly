@@ -141,12 +141,12 @@ export default function HomeScreen() {
   const hasProjects = projects.length > 0;
 
   // Show loading while checking onboarding status
-  if (isOnboardingCompleted === null) {
+  if (isOnboardingCompleted === null || isLoading) {
     console.log('⏳ Waiting for onboarding status check...');
     return (
       <View style={[styles.container, styles.loadingContainer]}>
         <ActivityIndicator size="large" color={Colors.primary} />
-        <Text style={styles.loadingText}>Loading...</Text>
+        <Text style={styles.loadingText}>Loading your workspace...</Text>
       </View>
     );
   }
@@ -157,7 +157,8 @@ export default function HomeScreen() {
     return <Redirect href="/onboarding/fact-stress" />;
   }
 
-  console.log('✅ Rendering home screen (onboarding completed)');
+  // User is authenticated and onboarding is complete - show main screen
+  console.log('✅ Rendering main screen (Dashboard)');
 
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
@@ -206,7 +207,7 @@ export default function HomeScreen() {
           }
         />
       ) : (
-        <EmptyState />
+        <EmptyState onNewProject={handleNewProject} />
       )}
 
       {/* Floating Action Button */}

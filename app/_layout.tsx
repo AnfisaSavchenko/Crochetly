@@ -13,6 +13,7 @@ import { useAuthCallback } from '@fastshot/auth';
 import { supabase } from '@/services/supabaseClient';
 import { AuthService } from '@/services/authService';
 import { ImagePreloader } from '@/services/imagePreloader';
+import { LoadingScreen } from '@/components/LoadingScreen';
 import { Colors } from '@/constants/theme';
 
 // Prevent splash screen from auto-hiding
@@ -96,13 +97,18 @@ export default function RootLayout() {
     }
   }, [fontsLoaded, fontError, imagesPreloaded]);
 
-  // Show loading state while fonts and images load, or during auth processing
-  if ((!fontsLoaded && !fontError) || !imagesPreloaded || isAuthProcessing) {
+  // Show loading state while fonts and images load
+  if ((!fontsLoaded && !fontError) || !imagesPreloaded) {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color={Colors.primary} />
       </View>
     );
+  }
+
+  // Show "Preparing workspace" during auth processing
+  if (isAuthProcessing) {
+    return <LoadingScreen message="Preparing your workspace... ✨" />;
   }
 
   return (
