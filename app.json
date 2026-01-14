@@ -10,7 +10,7 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.crochetly.app",
+      "bundleIdentifier": "com.wonderanf.crochetly",
       "infoPlist": {
         "NSCameraUsageDescription": "This allows you to capture photos of objects or pets directly in the app to generate custom crochet patterns.",
         "NSPhotoLibraryUsageDescription": "This allows you to select existing photos from your library to analyze and convert into custom crochet patterns.",
@@ -18,7 +18,7 @@
         "CFBundleURLTypes": [
           {
             "CFBundleURLSchemes": [
-              "com.crochetly.app"
+              "com.wonderanf.crochetly"
             ]
           }
         ]
@@ -30,14 +30,14 @@
         "backgroundColor": "#FDFBF7"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.crochetly.app",
+      "package": "com.wonderanf.crochetly",
       "intentFilters": [
         {
           "action": "VIEW",
           "autoVerify": true,
           "data": [
             {
-              "scheme": "com.crochetly.app"
+              "scheme": "com.wonderanf.crochetly"
             }
           ],
           "category": [
