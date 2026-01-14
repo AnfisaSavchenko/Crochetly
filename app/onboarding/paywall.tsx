@@ -1,6 +1,7 @@
 /**
  * Onboarding Paywall Screen
  * Single-screen premium subscription offer with trial periods
+ * Local-first: Both Continue and subtle X button complete onboarding
  */
 
 import React, { useState } from 'react';
@@ -18,6 +19,7 @@ import * as Haptics from 'expo-haptics';
 import { StrokedText } from '@/components';
 import { Colors, Spacing, FontSize, Fonts, NeoBrutalist } from '@/constants/theme';
 import { Ionicons } from '@expo/vector-icons';
+import { OnboardingStorage } from '@/services/onboardingStorage';
 
 type SubscriptionOption = '7days' | '1month';
 
@@ -58,21 +60,46 @@ export default function PaywallScreen() {
 
   const handleContinue = async () => {
     await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    // TODO: Handle subscription logic here
-    router.push('/onboarding/auth');
+    // Mark onboarding as complete locally
+    await OnboardingStorage.setOnboardingCompleted();
+    console.log('✅ Onboarding completed via Continue button');
+    // Navigate to main dashboard
+    router.replace('/');
+  };
+
+  const handleClose = async () => {
+    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    // Mark onboarding as complete locally
+    await OnboardingStorage.setOnboardingCompleted();
+    console.log('✅ Onboarding completed via close button');
+    // Navigate to main dashboard
+    router.replace('/');
   };
 
   return (
     <View style={[styles.container, { paddingTop: insets.top + Spacing.md, paddingBottom: insets.bottom > 0 ? insets.bottom + Spacing.md : Spacing.lg }]}>
-      {/* Back Button */}
-      <TouchableOpacity
-        style={styles.backButton}
-        onPress={() => router.back()}
-        activeOpacity={0.7}
-      >
-        <Ionicons name="chevron-back" size={20} color={Colors.text} />
-        <Text style={styles.backButtonText}>Camera</Text>
-      </TouchableOpacity>
+      {/* Header with Back and Subtle Close Button */}
+      <View style={styles.headerRow}>
+        {/* Back Button */}
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => router.back()}
+          activeOpacity={0.7}
+        >
+          <Ionicons name="chevron-back" size={20} color={Colors.text} />
+          <Text style={styles.backButtonText}>Camera</Text>
+        </TouchableOpacity>
+
+        {/* Subtle Close Button - Intentionally Hard to See */}
+        <TouchableOpacity
+          style={styles.closeButton}
+          onPress={handleClose}
+          activeOpacity={0.7}
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+        >
+          <Ionicons name="close" size={18} color={Colors.subtleClose} />
+        </TouchableOpacity>
+      </View>
 
       {/* Hero Image */}
       <View style={styles.heroContainer}>
@@ -166,17 +193,26 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
   },
+  headerRow: {
+    width: '100%',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: Spacing.sm,
+  },
   backButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    alignSelf: 'flex-start',
-    marginBottom: Spacing.sm,
   },
   backButtonText: {
     fontSize: FontSize.md,
     fontFamily: Fonts.heavy,
     color: Colors.text,
     marginLeft: 2,
+  },
+  closeButton: {
+    padding: 4,
+    opacity: 0.4, // Make it subtle
   },
   heroContainer: {
     alignItems: 'center',

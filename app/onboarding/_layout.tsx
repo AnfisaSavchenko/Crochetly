@@ -26,7 +26,6 @@ export default function OnboardingLayout() {
       <Stack.Screen name="quiz-motivation" />
       <Stack.Screen name="loading" />
       <Stack.Screen name="paywall" />
-      <Stack.Screen name="auth" />
     </Stack>
   );
 }

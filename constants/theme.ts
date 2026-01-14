@@ -23,6 +23,9 @@ export const Colors = {
   // Paywall Pink (exact: #F4A6BB)
   paywallPink: '#F4A6BB',
 
+  // Subtle close button color (blends with paywall pink, low contrast)
+  subtleClose: '#E89AAB',
+
   // Card/Surface - Off-White
   surface: '#F2F2F2',
   card: '#F2F2F2',
