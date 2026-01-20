@@ -6,3 +6,4 @@
 export * from './storage';
 export * from './ai';
 export * from './authDiagnostics';
+export * from './adaptyService';

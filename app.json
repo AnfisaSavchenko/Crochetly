@@ -2,7 +2,7 @@
   "expo": {
     "name": "Hookgenie",
     "slug": "hookgenie",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "fastshot",
@@ -74,6 +74,6 @@
         "projectId": "a58c7871-e319-4515-98d0-ba8b67464275"
       }
     },
-    "owner": "wonder_anf"
+    "owner": "fastshot_ai"
   }
 }
