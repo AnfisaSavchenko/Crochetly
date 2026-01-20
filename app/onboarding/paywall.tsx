@@ -56,9 +56,10 @@ const FEATURES = [
   "Create patterns you won't find anywhere else",
 ];
 
-// Legal URLs - Update these with your actual URLs
-const TERMS_URL = 'https://yourapp.com/terms';
-const PRIVACY_URL = 'https://yourapp.com/privacy';
+// Legal Document URL - Both Terms of Use and Privacy Policy point to the same document
+const LEGAL_DOC_URL = 'https://docs.google.com/document/d/1FwpnQvbmuaf80OxKjlCMwjQCqT13vVJZ6tOeQ-4Q2uk/edit?usp=sharing';
+const TERMS_URL = LEGAL_DOC_URL;
+const PRIVACY_URL = LEGAL_DOC_URL;
 
 export default function PaywallScreen() {
   const router = useRouter();
