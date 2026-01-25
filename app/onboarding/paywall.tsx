@@ -1,7 +1,7 @@
 /**
  * Onboarding Paywall Screen
  * Premium subscription offer with 3-day trial periods
- * Integrates with Adapty for purchase flow and App Store compliance
+ * Integrates with RevenueCat for purchase flow and App Store compliance
  */
 
 import React, { useState, useEffect } from 'react';
@@ -24,9 +24,14 @@ import { StrokedText } from '@/components';
 import { Colors, Spacing, FontSize, Fonts, NeoBrutalist } from '@/constants/theme';
 import { Ionicons } from '@expo/vector-icons';
 import { OnboardingStorage } from '@/services/onboardingStorage';
-import { adapty } from 'react-native-adapty';
-import { initializeAdapty, getPlacementId } from '@/services/adaptyService';
-import type { AdaptyPaywallProduct, AdaptyProfile } from 'react-native-adapty';
+import { PurchasesPackage } from 'react-native-purchases';
+import {
+  initializeRevenueCat,
+  getAvailablePackages,
+  makePurchase,
+  restorePurchases,
+  isRevenueCatInitialized,
+} from '@/services/revenuecatService';
 
 type SubscriptionOption = 'weekly' | 'monthly';
 
@@ -34,19 +39,22 @@ interface SubscriptionCardData {
   id: SubscriptionOption;
   trialText: string;
   pricingText: string;
-  productIdentifier?: string; // Adapty product ID
+  packageType?: string; // RevenueCat package type identifier
 }
 
-const SUBSCRIPTION_OPTIONS: SubscriptionCardData[] = [
+// Default subscription options (used when RevenueCat is not available)
+const DEFAULT_SUBSCRIPTION_OPTIONS: SubscriptionCardData[] = [
   {
     id: 'weekly',
     trialText: '3-day free trial',
     pricingText: 'then $7 per week',
+    packageType: 'WEEKLY',
   },
   {
     id: 'monthly',
     trialText: '3-day free trial',
     pricingText: 'then $15 per month',
+    packageType: 'MONTHLY',
   },
 ];
 
@@ -65,13 +73,15 @@ export default function PaywallScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const [selectedPlan, setSelectedPlan] = useState<SubscriptionOption>('weekly');
-  const [products, setProducts] = useState<AdaptyPaywallProduct[]>([]);
+  const [packages, setPackages] = useState<PurchasesPackage[]>([]);
+  const [subscriptionOptions, setSubscriptionOptions] = useState<SubscriptionCardData[]>(DEFAULT_SUBSCRIPTION_OPTIONS);
   const [isLoading, setIsLoading] = useState(true);
   const [isPurchasing, setIsPurchasing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     loadProducts();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const loadProducts = async () => {
@@ -79,16 +89,31 @@ export default function PaywallScreen() {
       setIsLoading(true);
       setError(null);
 
-      // Initialize Adapty
-      await initializeAdapty();
+      // Initialize RevenueCat
+      await initializeRevenueCat();
 
-      // Fetch paywall and products
-      const placementId = getPlacementId();
-      const paywall = await adapty.getPaywall(placementId);
-      const paywallProducts = await adapty.getPaywallProducts(paywall);
+      // Check if RevenueCat was initialized successfully
+      if (!isRevenueCatInitialized()) {
+        console.log('⚠️ RevenueCat not initialized - using default options');
+        setSubscriptionOptions(DEFAULT_SUBSCRIPTION_OPTIONS);
+        setIsLoading(false);
+        return;
+      }
 
-      setProducts(paywallProducts);
-      console.log('✅ Loaded Adapty products:', paywallProducts.length);
+      // Fetch packages from RevenueCat
+      const availablePackages = await getAvailablePackages();
+      setPackages(availablePackages);
+
+      if (availablePackages.length > 0) {
+        // Map RevenueCat packages to our subscription options
+        const mappedOptions = mapPackagesToOptions(availablePackages);
+        if (mappedOptions.length > 0) {
+          setSubscriptionOptions(mappedOptions);
+        }
+        console.log('✅ Loaded RevenueCat packages:', availablePackages.length);
+      } else {
+        console.log('⚠️ No packages available - using default options');
+      }
     } catch (err) {
       console.error('❌ Failed to load products:', err);
       setError('Failed to load subscription plans');
@@ -97,35 +122,83 @@ export default function PaywallScreen() {
     }
   };
 
+  const mapPackagesToOptions = (pkgs: PurchasesPackage[]): SubscriptionCardData[] => {
+    const options: SubscriptionCardData[] = [];
+
+    for (const pkg of pkgs) {
+      const identifier = pkg.packageType;
+      const product = pkg.product;
+
+      // Determine if this is weekly or monthly based on package type or identifier
+      let planId: SubscriptionOption | null = null;
+      if (identifier === 'WEEKLY' || pkg.identifier.toLowerCase().includes('week')) {
+        planId = 'weekly';
+      } else if (identifier === 'MONTHLY' || pkg.identifier.toLowerCase().includes('month')) {
+        planId = 'monthly';
+      }
+
+      if (planId) {
+        // Try to get trial info
+        const hasIntroPrice = product.introPrice !== null;
+        const trialText = hasIntroPrice
+          ? `${product.introPrice?.periodNumberOfUnits}-day free trial`
+          : '3-day free trial';
+
+        // Format price text
+        const priceText = `then ${product.priceString} per ${planId === 'weekly' ? 'week' : 'month'}`;
+
+        options.push({
+          id: planId,
+          trialText,
+          pricingText: priceText,
+          packageType: identifier,
+        });
+      }
+    }
+
+    // Sort to ensure weekly comes first, then monthly
+    options.sort((a, b) => (a.id === 'weekly' ? -1 : 1));
+
+    return options;
+  };
+
   const handleSelectPlan = (planId: SubscriptionOption) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setSelectedPlan(planId);
   };
 
-  const getSelectedProduct = (): AdaptyPaywallProduct | null => {
-    if (products.length === 0) return null;
+  const getSelectedPackage = (): PurchasesPackage | null => {
+    if (packages.length === 0) return null;
 
-    // Try to match by subscription period
-    const product = products.find((p) => {
-      const period = p.subscription?.subscriptionPeriod;
-      if (!period) return false;
-
+    // Find the package matching the selected plan
+    const pkg = packages.find((p) => {
+      const identifier = p.packageType;
       if (selectedPlan === 'weekly') {
-        return period.unit === 'week' || period.unit === 'day' && period.numberOfUnits === 7;
+        return identifier === 'WEEKLY' || p.identifier.toLowerCase().includes('week');
       } else {
-        return period.unit === 'month' && period.numberOfUnits === 1;
+        return identifier === 'MONTHLY' || p.identifier.toLowerCase().includes('month');
       }
     });
 
-    // Fallback to first product if no match
-    return product || products[0];
+    // Fallback to first package if no match
+    return pkg || packages[0];
   };
 
   const handleContinue = async () => {
     if (isPurchasing) return;
 
-    const selectedProduct = getSelectedProduct();
-    if (!selectedProduct) {
+    // Check if RevenueCat is available
+    if (!isRevenueCatInitialized() || packages.length === 0) {
+      Alert.alert(
+        'Setup Required',
+        'In-app purchases are not configured yet. Please add your RevenueCat API key to enable purchases.',
+        [{ text: 'OK' }]
+      );
+      return;
+    }
+
+    const selectedPackage = getSelectedPackage();
+    if (!selectedPackage) {
       Alert.alert('Error', 'No subscription plan selected');
       return;
     }
@@ -135,26 +208,33 @@ export default function PaywallScreen() {
       setError(null);
       await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 
-      const result = await adapty.makePurchase(selectedProduct);
+      const result = await makePurchase(selectedPackage);
 
-      switch (result.type) {
-        case 'success':
-          await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-          await handlePurchaseSuccess(result.profile);
-          break;
+      if (result.success && result.customerInfo) {
+        await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
 
-        case 'user_cancelled':
-          // User closed the purchase dialog - no error needed
-          setIsPurchasing(false);
-          break;
+        // Check if premium entitlement is now active
+        const isPremium = Boolean(result.customerInfo.entitlements.active['premium']);
 
-        case 'pending':
+        if (isPremium) {
+          await handlePurchaseSuccess();
+        } else {
+          // Purchase completed but entitlement not active yet
+          // This can happen with pending purchases
           Alert.alert(
-            'Purchase Pending',
-            'Your purchase is pending approval. You will be notified when it is complete.'
+            'Purchase Processing',
+            'Your purchase is being processed. Please try again in a moment.'
           );
           setIsPurchasing(false);
-          break;
+        }
+      } else if (result.userCancelled) {
+        // User closed the purchase dialog - no error needed
+        setIsPurchasing(false);
+      } else {
+        // Purchase failed
+        setError(result.error || 'Purchase failed');
+        Alert.alert('Purchase Failed', result.error || 'Please try again or contact support.');
+        setIsPurchasing(false);
       }
     } catch (err) {
       console.error('❌ Purchase error:', err);
@@ -164,7 +244,7 @@ export default function PaywallScreen() {
     }
   };
 
-  const handlePurchaseSuccess = async (profile: AdaptyProfile) => {
+  const handlePurchaseSuccess = async () => {
     // Mark onboarding as complete
     await OnboardingStorage.setOnboardingCompleted();
     console.log('✅ Purchase successful - Onboarding completed');
@@ -174,19 +254,36 @@ export default function PaywallScreen() {
   };
 
   const handleRestorePurchases = async () => {
+    // Check if RevenueCat is available
+    if (!isRevenueCatInitialized()) {
+      Alert.alert(
+        'Setup Required',
+        'In-app purchases are not configured yet. Please add your RevenueCat API key to enable restore.',
+        [{ text: 'OK' }]
+      );
+      return;
+    }
+
     try {
       setIsPurchasing(true);
       setError(null);
       await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 
-      const profile = await adapty.restorePurchases();
-      const isPremium = profile?.accessLevels?.['premium']?.isActive ?? false;
+      const result = await restorePurchases();
 
-      if (isPremium) {
-        Alert.alert('Success', 'Your purchases have been restored!');
-        await handlePurchaseSuccess(profile);
+      if (result.success && result.customerInfo) {
+        const isPremium = Boolean(result.customerInfo.entitlements.active['premium']);
+
+        if (isPremium) {
+          Alert.alert('Success', 'Your purchases have been restored!');
+          await handlePurchaseSuccess();
+        } else {
+          Alert.alert('No Purchases Found', 'No active subscriptions were found for this account.');
+          setIsPurchasing(false);
+        }
       } else {
-        Alert.alert('No Purchases Found', 'No active subscriptions were found for this account.');
+        setError(result.error || 'Restore failed');
+        Alert.alert('Restore Failed', result.error || 'Please try again or contact support.');
         setIsPurchasing(false);
       }
     } catch (err) {
@@ -311,7 +408,7 @@ export default function PaywallScreen() {
       {/* Subscription Cards with overlapping circles */}
       <View style={styles.subscriptionWrapper}>
         <View style={styles.subscriptionContainer}>
-          {SUBSCRIPTION_OPTIONS.map((option) => {
+          {subscriptionOptions.map((option) => {
             const isSelected = selectedPlan === option.id;
             return (
               <View key={option.id} style={styles.cardWrapper}>
