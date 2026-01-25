@@ -11,6 +11,7 @@ import { View, ActivityIndicator, StyleSheet } from 'react-native';
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
 import { ImagePreloader } from '@/services/imagePreloader';
+import { initializeRevenueCat } from '@/services/revenuecatService';
 import { Colors } from '@/constants/theme';
 
 // Prevent splash screen from auto-hiding
@@ -24,14 +25,17 @@ export default function RootLayout() {
 
   const [imagesPreloaded, setImagesPreloaded] = useState(false);
 
-  // Preload images on mount
+  // Preload images and initialize RevenueCat on mount
   useEffect(() => {
-    const preloadImages = async () => {
+    const initializeApp = async () => {
+      // Initialize RevenueCat SDK early for faster paywall loading
+      await initializeRevenueCat();
+      // Preload images
       await ImagePreloader.preloadImages();
       setImagesPreloaded(true);
     };
 
-    preloadImages();
+    initializeApp();
   }, []);
 
   // Hide splash screen only when both fonts and images are ready

@@ -37,8 +37,8 @@ type SubscriptionOption = 'weekly' | 'monthly';
 
 interface SubscriptionCardData {
   id: SubscriptionOption;
-  trialText: string;
-  pricingText: string;
+  periodText: string;
+  priceText: string;
   packageType?: string; // RevenueCat package type identifier
 }
 
@@ -46,14 +46,14 @@ interface SubscriptionCardData {
 const DEFAULT_SUBSCRIPTION_OPTIONS: SubscriptionCardData[] = [
   {
     id: 'weekly',
-    trialText: '3-day free trial',
-    pricingText: 'then $7 per week',
+    periodText: '7 days',
+    priceText: '$7',
     packageType: 'WEEKLY',
   },
   {
     id: 'monthly',
-    trialText: '3-day free trial',
-    pricingText: 'then $15 per month',
+    periodText: '1 month',
+    priceText: '$15',
     packageType: 'MONTHLY',
   },
 ];
@@ -138,19 +138,16 @@ export default function PaywallScreen() {
       }
 
       if (planId) {
-        // Try to get trial info
-        const hasIntroPrice = product.introPrice !== null;
-        const trialText = hasIntroPrice
-          ? `${product.introPrice?.periodNumberOfUnits}-day free trial`
-          : '3-day free trial';
+        // Format period text based on plan
+        const periodText = planId === 'weekly' ? '7 days' : '1 month';
 
-        // Format price text
-        const priceText = `then ${product.priceString} per ${planId === 'weekly' ? 'week' : 'month'}`;
+        // Format price text - just the price
+        const priceText = product.priceString || (planId === 'weekly' ? '$7' : '$15');
 
         options.push({
           id: planId,
-          trialText,
-          pricingText: priceText,
+          periodText,
+          priceText,
           packageType: identifier,
         });
       }
@@ -417,8 +414,8 @@ export default function PaywallScreen() {
                   onPress={() => handleSelectPlan(option.id)}
                   disabled={isPurchasing}
                 >
-                  <Text style={styles.cardTrialText}>{option.trialText}</Text>
-                  <Text style={styles.cardPricingText}>{option.pricingText}</Text>
+                  <Text style={styles.cardPeriodText}>{option.periodText}</Text>
+                  <Text style={styles.cardPriceText}>{option.priceText}</Text>
                 </Pressable>
                 {/* Overlapping circle positioned at bottom center */}
                 <Pressable
@@ -607,17 +604,17 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 4,
   },
-  cardTrialText: {
-    fontSize: FontSize.md,
+  cardPeriodText: {
+    fontSize: FontSize.xl,
     fontFamily: Fonts.heavy,
     color: Colors.text,
-    lineHeight: 20,
+    lineHeight: 28,
   },
-  cardPricingText: {
-    fontSize: FontSize.sm,
+  cardPriceText: {
+    fontSize: FontSize.md,
     fontFamily: Fonts.light,
     color: Colors.text,
-    lineHeight: 18,
+    lineHeight: 20,
   },
   radioCircle: {
     position: 'absolute',
