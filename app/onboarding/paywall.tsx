@@ -208,12 +208,29 @@ export default function PaywallScreen() {
   const handleContinue = async () => {
     if (isPurchasing) return;
 
-    // Check if RevenueCat is available
-    if (!isRevenueCatInitialized() || packages.length === 0) {
+    // Check if RevenueCat is available with packages
+    if (!isRevenueCatInitialized()) {
+      // No API key configured
       Alert.alert(
         'Setup Required',
-        'In-app purchases are not configured yet. Please add your RevenueCat API key to enable purchases.',
-        [{ text: 'OK' }]
+        'RevenueCat API key is not configured. Would you like to continue to the app for testing?',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          { text: 'Continue to App', onPress: () => handlePurchaseSuccess() }
+        ]
+      );
+      return;
+    }
+
+    if (packages.length === 0) {
+      // SDK initialized but no packages - offerings not set up in RevenueCat dashboard
+      Alert.alert(
+        'Store Not Ready',
+        'The subscription products are not yet available in the App Store. This typically happens when:\n\n• RevenueCat offerings are not configured\n• App Store products are pending review\n\nWould you like to continue to the app for testing?',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          { text: 'Continue to App', onPress: () => handlePurchaseSuccess() }
+        ]
       );
       return;
     }
@@ -290,8 +307,8 @@ export default function PaywallScreen() {
     // Check if RevenueCat is available
     if (!isRevenueCatInitialized()) {
       Alert.alert(
-        'Setup Required',
-        'In-app purchases are not configured yet. Please add your RevenueCat API key to enable restore.',
+        'Store Not Ready',
+        'The subscription service is not yet configured. Please try again later.',
         [{ text: 'OK' }]
       );
       return;
