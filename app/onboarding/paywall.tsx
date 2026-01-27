@@ -126,14 +126,23 @@ export default function PaywallScreen() {
     const options: SubscriptionCardData[] = [];
 
     for (const pkg of pkgs) {
-      const identifier = pkg.packageType;
+      const packageType = pkg.packageType;
       const product = pkg.product;
+      const identifier = pkg.identifier.toLowerCase();
 
-      // Determine if this is weekly or monthly based on package type or identifier
+      // Log package details for debugging
+      console.log(`📦 Package: ${pkg.identifier}, Type: ${packageType}, Product: ${product.identifier}`);
+
+      // Determine if this is weekly or monthly based on:
+      // 1. RevenueCat package type (WEEKLY, MONTHLY)
+      // 2. Package identifier ($rc_weekly, $rc_monthly, or custom names)
+      // 3. Product identifier patterns
       let planId: SubscriptionOption | null = null;
-      if (identifier === 'WEEKLY' || pkg.identifier.toLowerCase().includes('week')) {
+
+      // Check RevenueCat standard package types
+      if (packageType === 'WEEKLY' || identifier === '$rc_weekly' || identifier.includes('week')) {
         planId = 'weekly';
-      } else if (identifier === 'MONTHLY' || pkg.identifier.toLowerCase().includes('month')) {
+      } else if (packageType === 'MONTHLY' || identifier === '$rc_monthly' || identifier.includes('month')) {
         planId = 'monthly';
       }
 
@@ -141,14 +150,14 @@ export default function PaywallScreen() {
         // Format period text based on plan
         const periodText = planId === 'weekly' ? '7 days' : '1 month';
 
-        // Format price text - just the price
+        // Format price text - use localized price from product
         const priceText = product.priceString || (planId === 'weekly' ? '$7' : '$15');
 
         options.push({
           id: planId,
           periodText,
           priceText,
-          packageType: identifier,
+          packageType: packageType,
         });
       }
     }
@@ -169,11 +178,13 @@ export default function PaywallScreen() {
 
     // Find the package matching the selected plan
     const pkg = packages.find((p) => {
-      const identifier = p.packageType;
+      const packageType = p.packageType;
+      const identifier = p.identifier.toLowerCase();
+
       if (selectedPlan === 'weekly') {
-        return identifier === 'WEEKLY' || p.identifier.toLowerCase().includes('week');
+        return packageType === 'WEEKLY' || identifier === '$rc_weekly' || identifier.includes('week');
       } else {
-        return identifier === 'MONTHLY' || p.identifier.toLowerCase().includes('month');
+        return packageType === 'MONTHLY' || identifier === '$rc_monthly' || identifier.includes('month');
       }
     });
 

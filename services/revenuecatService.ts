@@ -71,10 +71,29 @@ export async function getOfferings(): Promise<PurchasesOfferings | null> {
 
 /**
  * Get available packages from current offering
+ * Fetches from the 'default' offering
  */
 export async function getAvailablePackages(): Promise<PurchasesPackage[]> {
   const offerings = await getOfferings();
-  return offerings?.current?.availablePackages ?? [];
+
+  // First try the current/default offering
+  if (offerings?.current?.availablePackages?.length) {
+    console.log('📦 Using current offering:', offerings.current.identifier);
+    return offerings.current.availablePackages;
+  }
+
+  // Fallback to 'default' offering by name
+  if (offerings?.all?.['default']?.availablePackages?.length) {
+    console.log('📦 Using "default" offering');
+    return offerings.all['default'].availablePackages;
+  }
+
+  // Log available offerings for debugging
+  if (offerings?.all) {
+    console.log('📦 Available offerings:', Object.keys(offerings.all));
+  }
+
+  return [];
 }
 
 /**
