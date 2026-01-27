@@ -16,6 +16,7 @@ import {
   Linking,
   Alert,
   ScrollView,
+  Modal,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -31,6 +32,9 @@ import {
   makePurchase,
   restorePurchases,
   isRevenueCatInitialized,
+  hasPremiumEntitlement,
+  getTrialDays,
+  formatTrialText,
 } from '@/services/revenuecatService';
 
 type SubscriptionOption = 'weekly' | 'monthly';
@@ -39,6 +43,7 @@ interface SubscriptionCardData {
   id: SubscriptionOption;
   periodText: string;
   priceText: string;
+  trialText?: string; // e.g., "3-day free trial"
   packageType?: string; // RevenueCat package type identifier
 }
 
@@ -48,12 +53,14 @@ const DEFAULT_SUBSCRIPTION_OPTIONS: SubscriptionCardData[] = [
     id: 'weekly',
     periodText: '7 days',
     priceText: '$7',
+    trialText: '3-day free trial',
     packageType: 'WEEKLY',
   },
   {
     id: 'monthly',
     periodText: '1 month',
     priceText: '$15',
+    trialText: '3-day free trial',
     packageType: 'MONTHLY',
   },
 ];
@@ -77,6 +84,7 @@ export default function PaywallScreen() {
   const [subscriptionOptions, setSubscriptionOptions] = useState<SubscriptionCardData[]>(DEFAULT_SUBSCRIPTION_OPTIONS);
   const [isLoading, setIsLoading] = useState(true);
   const [isPurchasing, setIsPurchasing] = useState(false);
+  const [purchaseMessage, setPurchaseMessage] = useState('Processing...');
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -153,10 +161,15 @@ export default function PaywallScreen() {
         // Format price text - use localized price from product
         const priceText = product.priceString || (planId === 'weekly' ? '$7' : '$15');
 
+        // Extract trial period info from product
+        const trialDays = getTrialDays(product);
+        const trialText = formatTrialText(trialDays) || '3-day free trial';
+
         options.push({
           id: planId,
           periodText,
           priceText,
+          trialText,
           packageType: packageType,
         });
       }
@@ -213,36 +226,48 @@ export default function PaywallScreen() {
 
     try {
       setIsPurchasing(true);
+      setPurchaseMessage('Preparing purchase...');
       setError(null);
       await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 
+      setPurchaseMessage('Connecting to App Store...');
       const result = await makePurchase(selectedPackage);
 
+      setPurchaseMessage('Verifying purchase...');
+
       if (result.success && result.customerInfo) {
+        // Success haptic feedback
         await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
 
         // Check if premium entitlement is now active
-        const isPremium = Boolean(result.customerInfo.entitlements.active['premium']);
+        const isPremium = hasPremiumEntitlement(result.customerInfo);
 
         if (isPremium) {
+          console.log('✅ Premium entitlement verified');
           await handlePurchaseSuccess();
         } else {
           // Purchase completed but entitlement not active yet
-          // This can happen with pending purchases
+          // This can happen with pending purchases or sandbox testing
+          console.log('⚠️ Purchase completed but entitlement pending');
           Alert.alert(
             'Purchase Processing',
-            'Your purchase is being processed. Please try again in a moment.'
+            'Your purchase is being processed. Please try again in a moment.',
+            [{ text: 'OK', onPress: () => setIsPurchasing(false) }]
           );
-          setIsPurchasing(false);
         }
       } else if (result.userCancelled) {
         // User closed the purchase dialog - no error needed
+        console.log('ℹ️ Purchase cancelled by user');
         setIsPurchasing(false);
       } else {
-        // Purchase failed
+        // Purchase failed - error haptic
+        await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
         setError(result.error || 'Purchase failed');
-        Alert.alert('Purchase Failed', result.error || 'Please try again or contact support.');
-        setIsPurchasing(false);
+        Alert.alert(
+          'Purchase Failed',
+          result.error || 'Please try again or contact support.',
+          [{ text: 'OK', onPress: () => setIsPurchasing(false) }]
+        );
       }
     } catch (err) {
       console.error('❌ Purchase error:', err);
@@ -274,25 +299,40 @@ export default function PaywallScreen() {
 
     try {
       setIsPurchasing(true);
+      setPurchaseMessage('Restoring purchases...');
       setError(null);
       await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 
       const result = await restorePurchases();
 
+      setPurchaseMessage('Verifying subscription...');
+
       if (result.success && result.customerInfo) {
-        const isPremium = Boolean(result.customerInfo.entitlements.active['premium']);
+        const isPremium = hasPremiumEntitlement(result.customerInfo);
 
         if (isPremium) {
-          Alert.alert('Success', 'Your purchases have been restored!');
-          await handlePurchaseSuccess();
+          await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+          Alert.alert(
+            'Success!',
+            'Your purchases have been restored. Welcome back!',
+            [{ text: 'Continue', onPress: () => handlePurchaseSuccess() }]
+          );
         } else {
-          Alert.alert('No Purchases Found', 'No active subscriptions were found for this account.');
-          setIsPurchasing(false);
+          await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+          Alert.alert(
+            'No Purchases Found',
+            'No active subscriptions were found for this account. If you believe this is an error, please contact support.',
+            [{ text: 'OK', onPress: () => setIsPurchasing(false) }]
+          );
         }
       } else {
+        await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
         setError(result.error || 'Restore failed');
-        Alert.alert('Restore Failed', result.error || 'Please try again or contact support.');
-        setIsPurchasing(false);
+        Alert.alert(
+          'Restore Failed',
+          result.error || 'Please try again or contact support.',
+          [{ text: 'OK', onPress: () => setIsPurchasing(false) }]
+        );
       }
     } catch (err) {
       console.error('❌ Restore error:', err);
@@ -335,17 +375,34 @@ export default function PaywallScreen() {
   }
 
   return (
-    <ScrollView
-      style={styles.scrollView}
-      contentContainerStyle={[
-        styles.container,
-        {
-          paddingTop: insets.top + Spacing.md,
-          paddingBottom: insets.bottom > 0 ? insets.bottom + Spacing.sm : Spacing.md,
-        },
-      ]}
-      showsVerticalScrollIndicator={false}
-    >
+    <>
+      {/* Professional Loading Overlay */}
+      <Modal
+        visible={isPurchasing}
+        transparent
+        animationType="fade"
+        statusBarTranslucent
+      >
+        <View style={styles.loadingOverlay}>
+          <View style={styles.loadingCard}>
+            <ActivityIndicator size="large" color={Colors.primary} />
+            <Text style={styles.loadingMessage}>{purchaseMessage}</Text>
+            <Text style={styles.loadingSubtext}>Please do not close the app</Text>
+          </View>
+        </View>
+      </Modal>
+
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={[
+          styles.container,
+          {
+            paddingTop: insets.top + Spacing.md,
+            paddingBottom: insets.bottom > 0 ? insets.bottom + Spacing.sm : Spacing.md,
+          },
+        ]}
+        showsVerticalScrollIndicator={false}
+      >
       {/* Header with Back and Subtle Close Button */}
       <View style={styles.headerRow}>
         {/* Back Button */}
@@ -427,6 +484,9 @@ export default function PaywallScreen() {
                 >
                   <Text style={styles.cardPeriodText}>{option.periodText}</Text>
                   <Text style={styles.cardPriceText}>{option.priceText}</Text>
+                  {option.trialText && (
+                    <Text style={styles.cardTrialText}>{option.trialText}</Text>
+                  )}
                 </Pressable>
                 {/* Overlapping circle positioned at bottom center */}
                 <Pressable
@@ -493,6 +553,7 @@ export default function PaywallScreen() {
         </View>
       </View>
     </ScrollView>
+    </>
   );
 }
 
@@ -697,5 +758,43 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontFamily: Fonts.light,
     color: Colors.subtleClose,
+  },
+  // Loading overlay styles
+  loadingOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: Spacing.lg,
+  },
+  loadingCard: {
+    backgroundColor: Colors.card,
+    borderRadius: NeoBrutalist.borderRadius,
+    borderWidth: NeoBrutalist.borderWidth,
+    borderColor: Colors.stroke,
+    padding: Spacing.xl,
+    alignItems: 'center',
+    minWidth: 220,
+  },
+  loadingMessage: {
+    marginTop: Spacing.md,
+    fontSize: FontSize.md,
+    fontFamily: Fonts.heavy,
+    color: Colors.text,
+    textAlign: 'center',
+  },
+  loadingSubtext: {
+    marginTop: Spacing.xs,
+    fontSize: FontSize.xs,
+    fontFamily: Fonts.light,
+    color: Colors.textSecondary,
+    textAlign: 'center',
+  },
+  // Trial text on cards
+  cardTrialText: {
+    fontSize: FontSize.xs,
+    fontFamily: Fonts.light,
+    color: Colors.textSecondary,
+    marginTop: 2,
   },
 });
