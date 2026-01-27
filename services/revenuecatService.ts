@@ -13,6 +13,7 @@ import Purchases, {
   PURCHASES_ERROR_CODE,
   PurchasesError,
   PurchasesStoreProduct,
+  LOG_LEVEL,
 } from 'react-native-purchases';
 import { Platform } from 'react-native';
 
@@ -23,6 +24,46 @@ const DEFAULT_OFFERING = 'default';
 
 let isInitialized = false;
 let initializationPromise: Promise<void> | null = null;
+let lastInitError: string | null = null;
+let lastOfferingsError: string | null = null;
+
+// Diagnostic info storage
+export interface RevenueCatDiagnostics {
+  sdkInitialized: boolean;
+  apiKeyPresent: boolean;
+  apiKeyPrefix: string;
+  initError: string | null;
+  offeringsError: string | null;
+  offeringsCount: number;
+  currentOfferingId: string | null;
+  packagesCount: number;
+  packageIds: string[];
+  customerAppUserId: string | null;
+  isSandbox: boolean;
+  platform: string;
+}
+
+let diagnosticInfo: RevenueCatDiagnostics = {
+  sdkInitialized: false,
+  apiKeyPresent: false,
+  apiKeyPrefix: '',
+  initError: null,
+  offeringsError: null,
+  offeringsCount: 0,
+  currentOfferingId: null,
+  packagesCount: 0,
+  packageIds: [],
+  customerAppUserId: null,
+  isSandbox: true,
+  platform: Platform.OS,
+};
+
+/**
+ * Get current diagnostic info for debugging
+ */
+export function getDiagnostics(): RevenueCatDiagnostics {
+  return { ...diagnosticInfo };
+}
 
 /**
  * Initialize RevenueCat SDK
@@ -43,21 +84,64 @@ export async function initializeRevenueCat(): Promise<void> {
     try {
       const apiKey = process.env.EXPO_PUBLIC_REVENUECAT_API_KEY;
 
+      // Update diagnostic info
+      diagnosticInfo.apiKeyPresent = Boolean(apiKey);
+      diagnosticInfo.apiKeyPrefix = apiKey ? `${apiKey.substring(0, 10)}...` : 'NOT SET';
+      diagnosticInfo.platform = Platform.OS;
+
       if (!apiKey) {
-        console.warn('⚠️ EXPO_PUBLIC_REVENUECAT_API_KEY not found - RevenueCat features will be limited');
+        const errorMsg = 'EXPO_PUBLIC_REVENUECAT_API_KEY not found in environment';
+        console.warn(`⚠️ ${errorMsg}`);
+        lastInitError = errorMsg;
+        diagnosticInfo.initError = errorMsg;
         return;
       }
 
+      console.log('═══════════════════════════════════════════════════');
+      console.log('🔧 RevenueCat Initialization');
+      console.log('═══════════════════════════════════════════════════');
+      console.log(`   Platform: ${Platform.OS}`);
+      console.log(`   API Key: ${apiKey.substring(0, 15)}...`);
+      console.log(`   Bundle ID: ${BUNDLE_ID}`);
+
+      // Enable verbose logging for debugging (sandbox mode)
+      Purchases.setLogLevel(LOG_LEVEL.VERBOSE);
+      console.log('   Log Level: VERBOSE (for debugging)');
+
       // Configure RevenueCat with the API key
-      // The SDK automatically uses the app's bundle ID from the native configuration
       await Purchases.configure({ apiKey });
 
       isInitialized = true;
-      console.log(`✅ RevenueCat initialized for ${Platform.OS}`);
-      console.log(`   Bundle ID: ${BUNDLE_ID}`);
-      console.log(`   Entitlement: ${PREMIUM_ENTITLEMENT}`);
+      diagnosticInfo.sdkInitialized = true;
+      diagnosticInfo.initError = null;
+      lastInitError = null;
+
+      // Get customer info to verify connection
+      try {
+        const customerInfo = await Purchases.getCustomerInfo();
+        diagnosticInfo.customerAppUserId = customerInfo.originalAppUserId;
+        diagnosticInfo.isSandbox = customerInfo.entitlements.all ? true : true; // Sandbox by default in dev
+
+        console.log(`   App User ID: ${customerInfo.originalAppUserId}`);
+        console.log(`   Active Entitlements: ${Object.keys(customerInfo.entitlements.active).join(', ') || 'None'}`);
+      } catch (customerError) {
+        console.log('   Could not fetch customer info (will retry on demand)');
+      }
+
+      console.log('═══════════════════════════════════════════════════');
+      console.log(`✅ RevenueCat initialized successfully`);
+      console.log('═══════════════════════════════════════════════════');
+
     } catch (error) {
-      console.error('❌ Failed to initialize RevenueCat:', error);
+      const errorMsg = error instanceof Error ? error.message : String(error);
+      console.error('═══════════════════════════════════════════════════');
+      console.error('❌ RevenueCat Initialization FAILED');
+      console.error(`   Error: ${errorMsg}`);
+      console.error('═══════════════════════════════════════════════════');
+
+      lastInitError = errorMsg;
+      diagnosticInfo.initError = errorMsg;
+      diagnosticInfo.sdkInitialized = false;
       initializationPromise = null;
       throw error;
     }
@@ -81,13 +165,53 @@ export async function getOfferings(): Promise<PurchasesOfferings | null> {
     await initializeRevenueCat();
 
     if (!isInitialized) {
+      const errorMsg = lastInitError || 'SDK not initialized';
+      diagnosticInfo.offeringsError = errorMsg;
       return null;
     }
 
+    console.log('───────────────────────────────────────────────────');
+    console.log('📦 Fetching RevenueCat Offerings...');
+
     const offerings = await Purchases.getOfferings();
+
+    // Update diagnostic info
+    diagnosticInfo.offeringsCount = offerings.all ? Object.keys(offerings.all).length : 0;
+    diagnosticInfo.currentOfferingId = offerings.current?.identifier || null;
+    diagnosticInfo.offeringsError = null;
+    lastOfferingsError = null;
+
+    console.log(`   Total Offerings: ${diagnosticInfo.offeringsCount}`);
+    console.log(`   Current Offering: ${diagnosticInfo.currentOfferingId || 'NOT SET'}`);
+
+    if (offerings.all) {
+      Object.keys(offerings.all).forEach(key => {
+        const offering = offerings.all[key];
+        console.log(`   - Offering "${key}": ${offering.availablePackages.length} packages`);
+        offering.availablePackages.forEach(pkg => {
+          console.log(`     • ${pkg.identifier} (${pkg.packageType}): ${pkg.product.priceString}`);
+        });
+      });
+    }
+
+    if (!offerings.current && diagnosticInfo.offeringsCount === 0) {
+      const warnMsg = 'No offerings configured in RevenueCat dashboard';
+      console.warn(`⚠️ ${warnMsg}`);
+      diagnosticInfo.offeringsError = warnMsg;
+    }
+
+    console.log('───────────────────────────────────────────────────');
+
     return offerings;
   } catch (error) {
-    console.error('❌ Failed to get offerings:', error);
+    const errorMsg = error instanceof Error ? error.message : String(error);
+    console.error('───────────────────────────────────────────────────');
+    console.error('❌ Failed to get offerings');
+    console.error(`   Error: ${errorMsg}`);
+    console.error('───────────────────────────────────────────────────');
+
+    lastOfferingsError = errorMsg;
+    diagnosticInfo.offeringsError = errorMsg;
     return null;
   }
 }
@@ -99,24 +223,60 @@ export async function getOfferings(): Promise<PurchasesOfferings | null> {
 export async function getAvailablePackages(): Promise<PurchasesPackage[]> {
   const offerings = await getOfferings();
 
+  let packages: PurchasesPackage[] = [];
+
   // First try the current/default offering
   if (offerings?.current?.availablePackages?.length) {
     console.log('📦 Using current offering:', offerings.current.identifier);
-    return offerings.current.availablePackages;
+    packages = offerings.current.availablePackages;
   }
-
   // Fallback to 'default' offering by name
-  if (offerings?.all?.['default']?.availablePackages?.length) {
+  else if (offerings?.all?.[DEFAULT_OFFERING]?.availablePackages?.length) {
     console.log('📦 Using "default" offering');
-    return offerings.all['default'].availablePackages;
+    packages = offerings.all[DEFAULT_OFFERING].availablePackages;
+  }
+  // Try any available offering as last resort
+  else if (offerings?.all) {
+    const offeringKeys = Object.keys(offerings.all);
+    console.log('📦 Available offerings:', offeringKeys);
+
+    if (offeringKeys.length > 0) {
+      const firstOffering = offerings.all[offeringKeys[0]];
+      if (firstOffering.availablePackages.length > 0) {
+        console.log(`📦 Using first available offering: "${offeringKeys[0]}"`);
+        packages = firstOffering.availablePackages;
+      }
+    }
   }
 
-  // Log available offerings for debugging
-  if (offerings?.all) {
-    console.log('📦 Available offerings:', Object.keys(offerings.all));
+  // Update diagnostic info
+  diagnosticInfo.packagesCount = packages.length;
+  diagnosticInfo.packageIds = packages.map(p => `${p.identifier} (${p.product.identifier})`);
+
+  if (packages.length === 0) {
+    console.warn('⚠️ No packages available');
+    console.warn('   Check RevenueCat dashboard:');
+    console.warn('   1. Create products in App Store Connect');
+    console.warn('   2. Add products to RevenueCat');
+    console.warn('   3. Create an offering with packages');
+    console.warn('   4. Set the offering as "current"');
   }
 
-  return [];
+  return packages;
+}
+
+/**
+ * Get the last initialization error
+ */
+export function getLastInitError(): string | null {
+  return lastInitError;
+}
+
+/**
+ * Get the last offerings error
+ */
+export function getLastOfferingsError(): string | null {
+  return lastOfferingsError;
 }
 
 /**

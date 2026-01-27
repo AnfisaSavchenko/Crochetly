@@ -35,6 +35,8 @@ import {
   hasPremiumEntitlement,
   getTrialDays,
   formatTrialText,
+  getDiagnostics,
+  RevenueCatDiagnostics,
 } from '@/services/revenuecatService';
 
 type SubscriptionOption = 'weekly' | 'monthly';
@@ -86,6 +88,8 @@ export default function PaywallScreen() {
   const [isPurchasing, setIsPurchasing] = useState(false);
   const [purchaseMessage, setPurchaseMessage] = useState('Processing...');
   const [error, setError] = useState<string | null>(null);
+  const [diagnostics, setDiagnostics] = useState<RevenueCatDiagnostics | null>(null);
+  const [showDiagnostics, setShowDiagnostics] = useState(false);
 
   useEffect(() => {
     loadProducts();
@@ -97,12 +101,22 @@ export default function PaywallScreen() {
       setIsLoading(true);
       setError(null);
 
+      console.log('═══════════════════════════════════════════════════');
+      console.log('🚀 Paywall: Starting product load...');
+      console.log('═══════════════════════════════════════════════════');
+
       // Initialize RevenueCat
       await initializeRevenueCat();
 
+      // Get diagnostic info after initialization
+      const diag = getDiagnostics();
+      setDiagnostics(diag);
+
       // Check if RevenueCat was initialized successfully
       if (!isRevenueCatInitialized()) {
-        console.log('⚠️ RevenueCat not initialized - using default options');
+        const errorMsg = diag.initError || 'RevenueCat SDK not initialized';
+        console.log(`⚠️ ${errorMsg} - using default options`);
+        setError(errorMsg);
         setSubscriptionOptions(DEFAULT_SUBSCRIPTION_OPTIONS);
         setIsLoading(false);
         return;
@@ -112,19 +126,42 @@ export default function PaywallScreen() {
       const availablePackages = await getAvailablePackages();
       setPackages(availablePackages);
 
+      // Update diagnostics after fetching packages
+      const updatedDiag = getDiagnostics();
+      setDiagnostics(updatedDiag);
+
       if (availablePackages.length > 0) {
         // Map RevenueCat packages to our subscription options
         const mappedOptions = mapPackagesToOptions(availablePackages);
+        console.log('✅ Paywall: Products loaded successfully');
+        console.log(`   Packages: ${availablePackages.length}`);
+        console.log('═══════════════════════════════════════════════════');
         if (mappedOptions.length > 0) {
           setSubscriptionOptions(mappedOptions);
+          setError(null); // Clear any previous errors
         }
-        console.log('✅ Loaded RevenueCat packages:', availablePackages.length);
       } else {
-        console.log('⚠️ No packages available - using default options');
+        // No packages available - show diagnostic error
+        const diagInfo = getDiagnostics();
+        const errorMsg = diagInfo.offeringsError || 'No products found in RevenueCat';
+        console.log('⚠️ No packages available');
+        console.log(`   Error: ${errorMsg}`);
+        console.log('   Using default options for display');
+        console.log('═══════════════════════════════════════════════════');
+        setError(errorMsg);
+        // Keep default options for UI but show error
       }
     } catch (err) {
-      console.error('❌ Failed to load products:', err);
-      setError('Failed to load subscription plans');
+      const errorMsg = err instanceof Error ? err.message : 'Failed to load subscription plans';
+      console.error('═══════════════════════════════════════════════════');
+      console.error('❌ Paywall: Failed to load products');
+      console.error(`   Error: ${errorMsg}`);
+      console.error('═══════════════════════════════════════════════════');
+      setError(errorMsg);
+
+      // Update diagnostics with error
+      const diagInfo = getDiagnostics();
+      setDiagnostics(diagInfo);
     } finally {
       setIsLoading(false);
     }
@@ -480,10 +517,80 @@ export default function PaywallScreen() {
         ))}
       </View>
 
-      {/* Error Display */}
+      {/* Error Display with Diagnostic Toggle */}
       {error && (
         <View style={styles.errorContainer}>
           <Text style={styles.errorText}>{error}</Text>
+          <TouchableOpacity
+            onPress={() => setShowDiagnostics(!showDiagnostics)}
+            style={styles.diagToggle}
+          >
+            <Text style={styles.diagToggleText}>
+              {showDiagnostics ? 'Hide Details' : 'Show Details'}
+            </Text>
+            <Ionicons
+              name={showDiagnostics ? 'chevron-up' : 'chevron-down'}
+              size={14}
+              color={Colors.textSecondary}
+            />
+          </TouchableOpacity>
+        </View>
+      )}
+
+      {/* Diagnostic Banner */}
+      {showDiagnostics && diagnostics && (
+        <View style={styles.diagnosticBanner}>
+          <Text style={styles.diagTitle}>🔧 RevenueCat Diagnostics</Text>
+          <View style={styles.diagRow}>
+            <Text style={styles.diagLabel}>SDK Initialized:</Text>
+            <Text style={[styles.diagValue, diagnostics.sdkInitialized ? styles.diagSuccess : styles.diagError]}>
+              {diagnostics.sdkInitialized ? '✓ Yes' : '✗ No'}
+            </Text>
+          </View>
+          <View style={styles.diagRow}>
+            <Text style={styles.diagLabel}>API Key:</Text>
+            <Text style={[styles.diagValue, diagnostics.apiKeyPresent ? styles.diagSuccess : styles.diagError]}>
+              {diagnostics.apiKeyPrefix}
+            </Text>
+          </View>
+          <View style={styles.diagRow}>
+            <Text style={styles.diagLabel}>Platform:</Text>
+            <Text style={styles.diagValue}>{diagnostics.platform}</Text>
+          </View>
+          <View style={styles.diagRow}>
+            <Text style={styles.diagLabel}>Current Offering:</Text>
+            <Text style={[styles.diagValue, diagnostics.currentOfferingId ? styles.diagSuccess : styles.diagError]}>
+              {diagnostics.currentOfferingId || 'Not Set'}
+            </Text>
+          </View>
+          <View style={styles.diagRow}>
+            <Text style={styles.diagLabel}>Packages Found:</Text>
+            <Text style={[styles.diagValue, diagnostics.packagesCount > 0 ? styles.diagSuccess : styles.diagError]}>
+              {diagnostics.packagesCount}
+            </Text>
+          </View>
+          {diagnostics.packageIds.length > 0 && (
+            <View style={styles.diagRow}>
+              <Text style={styles.diagLabel}>Package IDs:</Text>
+              <Text style={styles.diagValueSmall}>{diagnostics.packageIds.join(', ')}</Text>
+            </View>
+          )}
+          <View style={styles.diagRow}>
+            <Text style={styles.diagLabel}>App User ID:</Text>
+            <Text style={styles.diagValueSmall}>{diagnostics.customerAppUserId || 'Anonymous'}</Text>
+          </View>
+          {diagnostics.initError && (
+            <View style={styles.diagErrorBox}>
+              <Text style={styles.diagErrorLabel}>Init Error:</Text>
+              <Text style={styles.diagErrorValue}>{diagnostics.initError}</Text>
+            </View>
+          )}
+          {diagnostics.offeringsError && (
+            <View style={styles.diagErrorBox}>
+              <Text style={styles.diagErrorLabel}>Offerings Error:</Text>
+              <Text style={styles.diagErrorValue}>{diagnostics.offeringsError}</Text>
+            </View>
+          )}
         </View>
       )}
 
@@ -813,5 +920,86 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.light,
     color: Colors.textSecondary,
     marginTop: 2,
+  },
+  // Diagnostic toggle in error container
+  diagToggle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: Spacing.xs,
+    gap: 4,
+  },
+  diagToggleText: {
+    fontSize: FontSize.xs,
+    fontFamily: Fonts.light,
+    color: Colors.textSecondary,
+    textDecorationLine: 'underline',
+  },
+  // Diagnostic banner styles
+  diagnosticBanner: {
+    width: '100%',
+    backgroundColor: Colors.card,
+    borderRadius: NeoBrutalist.borderRadius,
+    borderWidth: NeoBrutalist.borderWidth,
+    borderColor: Colors.stroke,
+    padding: Spacing.md,
+    marginBottom: Spacing.sm,
+  },
+  diagTitle: {
+    fontSize: FontSize.sm,
+    fontFamily: Fonts.heavy,
+    color: Colors.text,
+    marginBottom: Spacing.sm,
+    textAlign: 'center',
+  },
+  diagRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 4,
+    flexWrap: 'wrap',
+  },
+  diagLabel: {
+    fontSize: FontSize.xs,
+    fontFamily: Fonts.heavy,
+    color: Colors.textSecondary,
+    flex: 1,
+  },
+  diagValue: {
+    fontSize: FontSize.xs,
+    fontFamily: Fonts.light,
+    color: Colors.text,
+    flex: 1,
+    textAlign: 'right',
+  },
+  diagValueSmall: {
+    fontSize: 10,
+    fontFamily: Fonts.light,
+    color: Colors.textSecondary,
+    flex: 2,
+    textAlign: 'right',
+  },
+  diagSuccess: {
+    color: Colors.success,
+  },
+  diagError: {
+    color: Colors.error,
+  },
+  diagErrorBox: {
+    backgroundColor: '#FFE5E5',
+    borderRadius: 8,
+    padding: Spacing.xs,
+    marginTop: Spacing.xs,
+  },
+  diagErrorLabel: {
+    fontSize: FontSize.xs,
+    fontFamily: Fonts.heavy,
+    color: Colors.error,
+    marginBottom: 2,
+  },
+  diagErrorValue: {
+    fontSize: 10,
+    fontFamily: Fonts.light,
+    color: Colors.error,
   },
 });
